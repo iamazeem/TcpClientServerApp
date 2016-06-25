@@ -14,10 +14,10 @@ using std::ostream;
         Logger::log( Logger::Level::INF, __FILE__, __FUNCTION__, __LINE__ )
 
 #define LOG_WRN() \
-		Logger::log( Logger::Level::WRN, __FILE__, __FUNCTION__, __LINE__ )
+        Logger::log( Logger::Level::WRN, __FILE__, __FUNCTION__, __LINE__ )
 
 #define LOG_ERR() \
-		Logger::log( Logger::Level::ERR, __FILE__, __FUNCTION__, __LINE__ )
+        Logger::log( Logger::Level::ERR, __FILE__, __FUNCTION__, __LINE__ )
 
 
 /** Logger Class - Definition **/
