@@ -1,4 +1,5 @@
 #include "client.hpp"
+#include "packet.hpp"
 
 using boost::asio::ip::address;
 using boost::system::error_code;
@@ -47,13 +48,13 @@ bool Client::connectToServer( void )
         _socket.connect( _endpoint, ec );
         if ( ec )
         {
+            LOG_ERR() << "Error: " << ec.message() << endl;
             isConnected = false;
         }
     }
     catch ( exception& ex )
     {
         LOG_ERR() << "Exception: " << ex.what() << endl;
-
         isConnected = false;
     }
 
@@ -73,18 +74,32 @@ void Client::initiateSession( void )
 {
     LOG_INF() << "Initiated session with the server!" << endl;
 
+    error_code ec;
     boost::asio::streambuf readBuf;
-    string dataReceived;
 
-    boost::asio::read_until( _socket, readBuf, "\n" );
+    Header header;
 
-    std::istream is(&readBuf);
-    is >> dataReceived;
+    boost::asio::read( _socket, boost::asio::buffer( &header, sizeof(header) ) );
 
-    LOG_INF() << "Received: " << dataReceived << endl;
+    LOG_INF() << "Header: " << sizeof(header) << " : "
+              << std::hex << header._version  << ", "
+              << std::hex << header._type     << ", "
+              << std::dec << header._length
+              << endl;
 
-    dataReceived += "\n";
-    boost::asio::write( _socket, boost::asio::buffer(dataReceived) );
+    const unsigned int readSize = header._length - sizeof(header);
+
+    LOG_INF() << "Read Size: " << readSize << endl;
+
+    boost::asio::read( _socket, readBuf, boost::asio::transfer_exactly(readSize), ec );
+    if ( ec )
+    {
+        LOG_ERR() << "Error: " << ec.message() << endl;
+    }
+
+    string dataReceived( (std::istreambuf_iterator<char>(&readBuf)), std::istreambuf_iterator<char>() );
+
+    LOG_INF() << "Data: " << dataReceived.length() << " : " << dataReceived << endl;
 
     LOG_INF() << "Session ended with the server!" << endl;
 }

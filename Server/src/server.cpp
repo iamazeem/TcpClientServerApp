@@ -20,13 +20,13 @@ Server::Server( const string       ip,
                 const unsigned int port,
                 const unsigned int nExecutorThreads )
                 :
-                _iosAcceptors( make_shared<io_service>() ),
-                _wrkAcceptors( make_shared<io_service::work>( *_iosAcceptors ) ),
-                _iosExecutors( make_shared<io_service>() ),
-                _wrkExecutors( make_shared<io_service::work>( *_iosExecutors ) ),
-                _endpoint( address::from_string(ip), port ),
-                _acceptor( *_iosAcceptors, _endpoint ),
-                _newSession( make_shared<Session>( _iosExecutors ) )
+                _iosAcceptors{ make_shared<io_service>() },
+                _wrkAcceptors{ make_shared<io_service::work>( *_iosAcceptors ) },
+                _iosExecutors{ make_shared<io_service>() },
+                _wrkExecutors{ make_shared<io_service::work>( *_iosExecutors ) },
+                _endpoint    { address::from_string(ip), port },
+                _acceptor    { *_iosAcceptors, _endpoint },
+                _newSession  { make_shared<Session>( _iosExecutors ) }
 {
     LOG_INF() << "Initiating server..." << endl;
 
