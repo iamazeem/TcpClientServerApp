@@ -16,9 +16,9 @@ using boost::asio::placeholders::error;
 
 
 /* Interface function definitions */
-Server::Server( const string       ip,
-                const unsigned int port,
-                const unsigned int nExecutorThreads )
+Server::Server( const string         ip,
+                const unsigned short port,
+                const unsigned int   nExecutorThreads )
                 :
                 _iosAcceptors{ make_shared<io_service>() },
                 _wrkAcceptors{ make_shared<io_service::work>( *_iosAcceptors ) },
@@ -26,8 +26,14 @@ Server::Server( const string       ip,
                 _wrkExecutors{ make_shared<io_service::work>( *_iosExecutors ) },
                 _endpoint    { address::from_string(ip), port },
                 _acceptor    { *_iosAcceptors, _endpoint },
-                _newSession  { make_shared<Session>( _iosExecutors ) }
+                _newSession  { make_shared<Session>( _iosExecutors ) },
+                _signals     { *_iosAcceptors, SIGINT, SIGTERM }
 {
+    /** Add signal handling for graceful termination (CTRL + C) **/
+    _signals.async_wait( bind( &Server::stop, this) );
+
+    /** Normal initialization flow of the server **/
+
     LOG_INF() << "Initiating server..." << endl;
 
     for ( unsigned int i = 0; i < nExecutorThreads; ++i )
@@ -48,6 +54,10 @@ Server::Server( const string       ip,
 Server::~Server()
 {
     stop();
+
+    lockStream();
+    LOG_INF() << "Server closed successfully! Bye bye! :)" << endl;
+    unlockStream();
 }
 
 void Server::start( void )
@@ -57,17 +67,17 @@ void Server::start( void )
 
 void Server::stop( void )
 {
-    lockStream();
-    LOG_INF() << "Closing server..." << endl;
-    unlockStream();
+    if ( !_iosAcceptors->stopped() )
+    {
+        _iosAcceptors->stop();
+    }
 
-    _iosAcceptors->stop();
-    _iosExecutors->stop();
-    _thgExecutors.join_all();
-
-    lockStream();
-    LOG_INF() << "Server closed successfully! Bye bye! :)" << endl;
-    unlockStream();
+    if ( !_iosExecutors->stopped() )
+    {
+        _iosExecutors->stop();
+        //_thgExecutors.interrupt_all();
+        //_thgExecutors.join_all();
+    }
 }
 
 /** Utility function definitions **/

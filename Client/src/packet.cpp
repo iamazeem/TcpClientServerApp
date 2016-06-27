@@ -17,7 +17,7 @@ Packet::Packet( const unsigned int version,
 }
 
 const unsigned int Packet::getVersion( void ) const { return _header._version;  }
-const unsigned int Packet::getType   ( void ) const { return _header._type;     }
+const unsigned int Packet::getMsgType   ( void ) const { return _header._type;     }
 const unsigned int Packet::getLength ( void ) const { return _header._length;   }
 const Header&      Packet::getHeader ( void ) const { return _header;           }
 const string&      Packet::getMessage( void ) const { return _message;          }
@@ -53,7 +53,7 @@ std::ostream& operator<<( std::ostream& os, const Packet& packet )
 {
     os << "Packet: HDR {V:"
        << std::hex << packet.getVersion() << ", T:0x"
-       << std::hex << packet.getType() << ", L:"
+       << std::hex << packet.getMsgType() << ", L:"
        << std::dec << packet.getPktSize() << "} | ";
 
     os << "MSG {L:" << packet.getMsgSize() << "} "

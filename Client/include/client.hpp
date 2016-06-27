@@ -13,8 +13,8 @@ using boost::system::error_code;
 class Client
 {
 public:
-	Client( const string       ip,
-	        const unsigned int port );
+	Client( const string         ip,
+	        const unsigned short port );
 
 	~Client();
 

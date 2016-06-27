@@ -1,13 +1,14 @@
 #include "client.hpp"
 #include "packet.hpp"
 
+using std::istreambuf_iterator;
 using boost::asio::ip::address;
 using boost::system::error_code;
 using boost::asio::placeholders::error;
 
 
-Client::Client( const string       ip,
-                const unsigned int port )
+Client::Client( const string         ip,
+                const unsigned short port )
                 :
                 _endpoint( address::from_string( ip ), port ),
                 _socket( _ios )
@@ -97,7 +98,7 @@ void Client::initiateSession( void )
         LOG_ERR() << "Error: " << ec.message() << endl;
     }
 
-    string dataReceived( (std::istreambuf_iterator<char>(&readBuf)), std::istreambuf_iterator<char>() );
+    string dataReceived( ( istreambuf_iterator< char >( &readBuf ) ), istreambuf_iterator< char >() );
 
     LOG_INF() << "Data: " << dataReceived.length() << " : " << dataReceived << endl;
 

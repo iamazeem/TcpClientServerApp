@@ -7,8 +7,7 @@
 
 
 /** Interface function definitions **/
-
-Session::Session( shared_ptr<io_service> ios ) : _ios{ ios }, _socket{ *_ios }
+Session::Session( shared_ptr<io_service> ios ) : _ios{ ios }, _socket{ *_ios }, _packet{}
 {
 }
 
@@ -21,42 +20,9 @@ void Session::start( void )
 {
     try
     {
-        Packet packet;
+        _packet.processPackets( _socket );
 
-        std::ostringstream ss;
-        ss << "Welcome user! [" << getPeerIp( _socket ) << ":" << getPeerPort( _socket ) << "]\n";
-
-        packet.setMessage( ss.str() );
-        packet.set( MSG_VERSION, MSG_WELCOME, packet.getPktSize() );
-
-        lockStream();
-        LOG_INF() << packet << endl;
-        unlockStream();
-
-        boost::asio::write( _socket, boost::asio::buffer( &packet.getHeader(), packet.getHdrSize() ) );
-        boost::asio::write( _socket, boost::asio::buffer( packet.getMessage(), packet.getMsgSize() ) );
-
-//        boost::asio::streambuf readBuf;
-//        string command;
-//
-//        string welcome = "Welcome!\n";
-
-//        boost::asio::write( _socket, boost::asio::buffer(welcome) );
-//        boost::asio::read_until( _socket, readBuf, "\n" );
-//        boost::asio::write( _socket, boost::asio::buffer(readBuf.data()) );
-
-//        do
-//        {
-//            boost::asio::read_until( _socket, readBuf, "\n" );
-//            boost::asio::write( _socket, boost::asio::buffer(readBuf.data()) );
-//
-//            std::istream is(&readBuf);
-//            is >> command;
-//
-//        } while( command != "EXIT" );
-//
-        _socket.shutdown( boost::asio::socket_base::shutdown_both );
-        _socket.close();
+        stop();
     }
     catch ( exception& ex )
     {
@@ -64,4 +30,10 @@ void Session::start( void )
         LOG_ERR() << "Exception: " << ex.what() << endl;
         unlockStream();
     }
+}
+
+void Session::stop( void )
+{
+    _socket.shutdown( boost::asio::socket_base::shutdown_both );
+    _socket.close();
 }

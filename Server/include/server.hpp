@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
@@ -22,9 +23,9 @@ class Server : public boost::noncopyable
 public:
     enum class Defaults : unsigned int { EXECUTOR_THREADS = SERVER_THREADS };
 
-    Server( const string       ip,
-            const unsigned int port,
-            const unsigned int nExecutorThreads );
+    Server( const string         ip,
+            const unsigned short port,
+            const unsigned int   nExecutorThreads );
 
     ~Server();
 
@@ -49,6 +50,8 @@ private:
     tcp::acceptor                   _acceptor;
 
     shared_ptr<Session>             _newSession;
+
+    boost::asio::signal_set         _signals;
 };
 
 

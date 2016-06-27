@@ -24,7 +24,7 @@ public:
             const string&      message );
 
     const unsigned int getVersion( void ) const;
-    const unsigned int getType   ( void ) const;
+    const unsigned int getMsgType   ( void ) const;
     const unsigned int getLength ( void ) const;
     const Header&      getHeader ( void ) const;
     const string&      getMessage( void ) const;
