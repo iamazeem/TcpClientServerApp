@@ -25,7 +25,7 @@ Packet::Packet( const unsigned int version,
 }
 
 const unsigned int Packet::getVersion( void ) const { return _header._version;  }
-const unsigned int Packet::getMsgType   ( void ) const { return _header._type;     }
+const unsigned int Packet::getMsgType( void ) const { return _header._type;     }
 const unsigned int Packet::getLength ( void ) const { return _header._length;   }
 const unsigned int Packet::getHdrSize( void ) const { return sizeof(_header);   }
 const unsigned int Packet::getMsgSize( void ) const { return _message.length(); }
@@ -110,13 +110,6 @@ error_code Packet::send( tcp::socket& socket )
 {
     error_code ec;
 
-    lockStream();
-    LOG_INF() << "Sending packet to client ["
-              << getPeerIp( socket ) << ":"
-              << getPeerPort( socket )
-              << "]..." << endl;
-    unlockStream();
-
     // Send packet header
     write( socket, buffer( &_header, getHdrSize() ), transfer_exactly( getHdrSize() ), ec );
     if ( ec )
@@ -162,10 +155,11 @@ error_code Packet::processPackets( tcp::socket& socket )
 {
     error_code ec;
 
-    /* Send welcome message to client */
+    // Send welcome message to client
     ec = welcomeClient( socket );
     if ( ec ) return ec;
 
+    // Communicate with client using defined protocol
     do
     {
         ec = recv( socket );
@@ -175,12 +169,20 @@ error_code Packet::processPackets( tcp::socket& socket )
             {
                 if ( getMsgType() == MSG_COMMAND )
                 {
-                    ec = processCommand();
+                    ec = processCommand( getMessage(), socket );
                 }
+            }
+            else
+            {
+                lockStream();
+                LOG_INF() << "Invalid message format! -> " << *this << endl;
+                unlockStream();
             }
         }
 
-    } while ( !ec && socket.is_open() && getMsgType() != MSG_EXIT );
+    } while ( !ec && socket.is_open()  &&
+              getMsgType() != MSG_EXIT &&
+              getMessage() != "EXIT" );
 
     return ec;
 }
@@ -223,9 +225,73 @@ error_code Packet::welcomeClient( tcp::socket& socket )
     return ec;
 }
 
-error_code Packet::processCommand( void )
+error_code Packet::processCommand( const string cmd, tcp::socket& socket )
+{
+    /** For now, only "ls" command is hard-coded! **/
+
+    error_code ec;
+
+    string          cmdOutput;
+    unsigned int    msgType;
+
+    // Execute command and form output message
+    if( std::system( cmd.data() ) == boost::system::errc::success )
+    {
+        cmdOutput = "File is present!";
+        msgType   = MSG_FILE_PRESENT;
+    }
+    else
+    {
+        cmdOutput = "File is NOT present!";
+        msgType   = MSG_FILE_NOT_PRESENT;
+    }
+
+    // Form output packet
+    setMessage( cmdOutput );
+    set( MSG_VERSION, msgType, getPktSize() );
+
+    // Send command output
+    ec = send( socket );
+    if ( ec )
+    {
+        lockStream();
+        LOG_ERR() << ec.message() << endl;
+        unlockStream();
+    }
+
+    lockStream();
+    LOG_INF() << "Command output sent! -> " << *this << endl;
+    unlockStream();
+
+    // Acknowledge client response
+    ec = ackClientRsp( socket );
+
+    return ec;
+}
+
+error_code Packet::ackClientRsp( tcp::socket& socket )
 {
     error_code ec;
+
+    ec = recv( socket );
+    if ( ec ) return ec;
+
+    if ( isValidVersion() && isValidMsgType() )
+    {
+        if ( getMsgType() == MSG_DATA_ACK ||
+             getMsgType() == MSG_FIN_DATA_ACK )
+        {
+            lockStream();
+            LOG_INF() << "Acknowledgment received from client!" << endl;
+            unlockStream();
+        }
+        else
+        {
+            lockStream();
+            LOG_INF() << "Invalid message format! -> " << *this << endl;
+            unlockStream();
+        }
+    }
 
     return ec;
 }

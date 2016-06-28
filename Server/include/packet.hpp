@@ -50,7 +50,8 @@ public:
 
 private:
     error_code welcomeClient ( tcp::socket& socket );
-    error_code processCommand( void );
+    error_code processCommand( const string cmd, tcp::socket& socket );
+    error_code ackClientRsp  ( tcp::socket& socket );
 
     bool isValidVersion( void );
     bool isValidMsgType( void );

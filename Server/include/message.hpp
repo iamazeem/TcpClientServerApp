@@ -11,7 +11,8 @@
 #define MSG_WELCOME             0x11
 #define MSG_DATA_FRAME          0x1A
 #define MSG_FIN_DATA_FRAME      0x1B
-#define MSG_FILE_PRESENT        0x1E
+#define MSG_FILE_PRESENT        0x13
+#define MSG_FILE_NOT_PRESENT    0x14
 
 // Client Message Types - TO RECV
 #define MSG_COMMAND             0x1C
