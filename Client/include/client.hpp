@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 
 #include "common.hpp"
+#include "packet.hpp"
 
 using boost::asio::ip::tcp;
 using boost::asio::io_service;
@@ -23,11 +24,12 @@ public:
 
 private:
 	bool connectToServer( void );
-	void initiateSession( void );
 
 	io_service      _ios;
 	tcp::endpoint   _endpoint;
 	tcp::socket     _socket;
+
+	Packet          _packet;
 };
 
 

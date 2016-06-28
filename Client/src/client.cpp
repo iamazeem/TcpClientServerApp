@@ -28,7 +28,9 @@ void Client::start( void )
 {
     if ( !connectToServer() ) { return; }
 
-    initiateSession();
+    _packet.processPackets( _socket );
+
+    stop();
 }
 
 void Client::stop ( void )
@@ -69,38 +71,4 @@ bool Client::connectToServer( void )
     }
 
     return isConnected;
-}
-
-void Client::initiateSession( void )
-{
-    LOG_INF() << "Initiated session with the server!" << endl;
-
-    error_code ec;
-    boost::asio::streambuf readBuf;
-
-    Header header;
-
-    boost::asio::read( _socket, boost::asio::buffer( &header, sizeof(header) ) );
-
-    LOG_INF() << "Header: " << sizeof(header) << " : "
-              << std::hex << header._version  << ", "
-              << std::hex << header._type     << ", "
-              << std::dec << header._length
-              << endl;
-
-    const unsigned int readSize = header._length - sizeof(header);
-
-    LOG_INF() << "Read Size: " << readSize << endl;
-
-    boost::asio::read( _socket, readBuf, boost::asio::transfer_exactly(readSize), ec );
-    if ( ec )
-    {
-        LOG_ERR() << "Error: " << ec.message() << endl;
-    }
-
-    string dataReceived( ( istreambuf_iterator< char >( &readBuf ) ), istreambuf_iterator< char >() );
-
-    LOG_INF() << "Data: " << dataReceived.length() << " : " << dataReceived << endl;
-
-    LOG_INF() << "Session ended with the server!" << endl;
 }

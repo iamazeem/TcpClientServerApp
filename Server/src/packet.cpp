@@ -59,8 +59,7 @@ void Packet::set ( const unsigned int version,
 error_code Packet::recv( tcp::socket& socket )
 {
     error_code ec;
-
-    streambuf readBuf;
+    streambuf  readBuf;
 
     read( socket, buffer( &_header, getHdrSize() ), transfer_exactly( getHdrSize() ), ec );
     if ( ec )
@@ -72,19 +71,19 @@ error_code Packet::recv( tcp::socket& socket )
         return ec;
     }
 
-    lockStream();
-    LOG_INF() << "Header: "
-              << std::hex << getVersion() << ", "
-              << std::hex << getMsgType()    << ", "
-              << std::dec << getLength()  << endl;
-    unlockStream();
+//    lockStream();
+//    LOG_INF() << "Header: "
+//              << std::hex << getVersion() << ", "
+//              << std::hex << getMsgType()    << ", "
+//              << std::dec << getLength()  << endl;
+//    unlockStream();
 
     const unsigned int readSize = getLength() - getHdrSize();
     if ( readSize > 0 )
     {
-        lockStream();
-        LOG_INF() << "Read Size: " << readSize << endl;
-        unlockStream();
+//        lockStream();
+//        LOG_INF() << "Read Size: " << readSize << endl;
+//        unlockStream();
 
         read( socket, readBuf, transfer_exactly(readSize), ec );
         if ( ec )
@@ -99,7 +98,7 @@ error_code Packet::recv( tcp::socket& socket )
         setMessage( dataReceived );
 
         lockStream();
-        LOG_INF() << "Data: " << getMsgSize() << " : " << getMessage() << endl;
+        LOG_INF() << "Received: " << *this << endl;
         unlockStream();
     }
 
@@ -109,6 +108,10 @@ error_code Packet::recv( tcp::socket& socket )
 error_code Packet::send( tcp::socket& socket )
 {
     error_code ec;
+
+    lockStream();
+    LOG_INF() << "Sending packet: " << *this << endl;
+    unlockStream();
 
     // Send packet header
     write( socket, buffer( &_header, getHdrSize() ), transfer_exactly( getHdrSize() ), ec );
@@ -139,7 +142,7 @@ error_code Packet::send( tcp::socket& socket )
     }
 
     lockStream();
-    LOG_INF() << "Packet sent to client ["
+    LOG_INF() << "Packet sent! ["
               << getPeerIp( socket ) << ":"
               << getPeerPort( socket )
               << "]..." << endl;
@@ -167,15 +170,26 @@ error_code Packet::processPackets( tcp::socket& socket )
         {
             if ( isValidVersion() && isValidMsgType() )
             {
+                if ( getMsgType() == MSG_EXIT )
+                {
+                    lockStream();
+                    LOG_INF() << "EXIT packet received! -> " << *this << endl;
+                    unlockStream();
+                }
+                else
                 if ( getMsgType() == MSG_COMMAND )
                 {
                     ec = processCommand( getMessage(), socket );
+
+                    lockStream();
+                    LOG_INF() << "COMMAND PROCESSING COMPLETED!" << endl;
+                    unlockStream();
                 }
             }
             else
             {
                 lockStream();
-                LOG_INF() << "Invalid message format! -> " << *this << endl;
+                LOG_ERR() << "Invalid message format! -> " << *this << endl;
                 unlockStream();
             }
         }
@@ -183,6 +197,10 @@ error_code Packet::processPackets( tcp::socket& socket )
     } while ( !ec && socket.is_open()  &&
               getMsgType() != MSG_EXIT &&
               getMessage() != "EXIT" );
+
+    lockStream();
+    LOG_INF() << "Session ended with client!" << endl;
+    unlockStream();
 
     return ec;
 }
@@ -260,7 +278,7 @@ error_code Packet::processCommand( const string cmd, tcp::socket& socket )
     }
 
     lockStream();
-    LOG_INF() << "Command output sent! -> " << *this << endl;
+    LOG_INF() << "Command output sent!" << endl;
     unlockStream();
 
     // Acknowledge client response
@@ -288,7 +306,7 @@ error_code Packet::ackClientRsp( tcp::socket& socket )
         else
         {
             lockStream();
-            LOG_INF() << "Invalid message format! -> " << *this << endl;
+            LOG_ERR() << "Invalid message format! -> " << *this << endl;
             unlockStream();
         }
     }
