@@ -7,7 +7,7 @@ int main( void )
     Server server{ SERVER_IP, SERVER_PORT, SERVER_THREADS };
     server.start();
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 
