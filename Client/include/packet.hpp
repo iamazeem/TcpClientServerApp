@@ -8,7 +8,6 @@
 using boost::asio::ip::tcp;
 using boost::system::error_code;
 
-
 class Packet
 {
 public:
@@ -17,7 +16,7 @@ public:
     Packet( const unsigned int version,
             const unsigned int type,
             const unsigned int length,
-            const string&      message );
+            const std::string& message );
 
     const unsigned int getVersion() const;
     const unsigned int getMsgType() const;
@@ -25,12 +24,12 @@ public:
     const unsigned int getHdrSize() const;
     const unsigned int getMsgSize() const;
     const unsigned int getPktSize() const;
-    const string&      getMessage() const;
+    const std::string& getMessage() const;
 
     void setVersion( const unsigned int version );
     void setType   ( const unsigned int type    );
     void setLength ( const unsigned int length  );
-    void setMessage( const string&      message );
+    void setMessage( const std::string& message );
 
     void set ( const unsigned int version,
                const unsigned int type,
@@ -39,7 +38,7 @@ public:
     void set ( const unsigned int version,
                const unsigned int type,
                const unsigned int length,
-               const string&      message );
+               const std::string& message );
 
     error_code recv( tcp::socket& socket );
     error_code send( tcp::socket& socket );
@@ -62,8 +61,7 @@ private:
     };
 
     Header              _header;
-    string              _message;
+    std::string         _message;
 };
-
 
 #endif /* INCLUDE_PACKET_HPP_ */

@@ -3,11 +3,6 @@
 
 #include "common.hpp"
 
-using std::cout;
-using std::string;
-using std::ostream;
-
-
 /** Logging Macros **/
 
 #define LOG_INF() \
@@ -19,7 +14,6 @@ using std::ostream;
 #define LOG_ERR() \
         Logger::log( Logger::Level::ERR, __FILE__, __FUNCTION__, __LINE__ )
 
-
 /** Logger Class - Definition **/
 
 class Logger
@@ -27,12 +21,12 @@ class Logger
 public:
     enum class Level : unsigned int { INF, WRN, ERR };
 
-    static inline ostream& log( const Level  level,
-                                const char*  file,
-                                const char*  func,
-                                unsigned int line )
+    static inline std::ostream& log( const Level  level,
+                                     const char*  file,
+                                     const char*  func,
+                                     unsigned int line )
     {
-        string strLogLvl;
+        std::string strLogLvl;
 
         switch ( level )
         {
@@ -49,12 +43,11 @@ public:
                 break;
         }
 
-        cout << strLogLvl << " : "
-             << file << ": " << func << "(): " << line << ": ";
+        std::cout << strLogLvl << " : "
+                  << file << ": " << func << "(): " << line << ": ";
 
-        return cout;
+        return std::cout;
     }
 };
-
 
 #endif /* INCLUDE_LOGGER_HPP_ */

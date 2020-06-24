@@ -1,13 +1,17 @@
 #include <sstream>
+#include <exception>
 
 #include "common.hpp"
 #include "session.hpp"
 #include "packet.hpp"
 #include "utilities.hpp"
 
-
 /** Interface function definitions **/
-Session::Session( shared_ptr<io_service> ios ) : _ios{ ios }, _socket{ *_ios }, _packet{}
+Session::Session( shared_ptr<io_service> ios )
+    :
+    _ios{ ios },
+    _socket{ *_ios },
+    _packet{}
 {
 }
 
@@ -24,10 +28,10 @@ void Session::start()
 
         stop();
     }
-    catch ( exception& ex )
+    catch ( const std::exception& ex )
     {
         lockStream();
-        LOG_ERR() << "Exception: " << ex.what() << endl;
+        LOG_ERR() << "Exception: " << ex.what() << std::endl;
         unlockStream();
     }
 }

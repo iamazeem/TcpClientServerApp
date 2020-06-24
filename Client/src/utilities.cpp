@@ -1,7 +1,6 @@
 #include "utilities.hpp"
 
-
-string getPeerIp( const tcp::socket& socket )
+std::string getPeerIp( const tcp::socket& socket )
 {
     return socket.remote_endpoint().address().to_string();
 }

@@ -10,20 +10,18 @@
 
 #include "session.hpp"
 
-using std::string;
 using boost::shared_ptr;
 using boost::asio::ip::tcp;
 using boost::asio::io_service;
 using boost::system::error_code;
 using boost::enable_shared_from_this;
 
-
 class Server : public boost::noncopyable
 {
 public:
     enum class Defaults : unsigned int { EXECUTOR_THREADS = SERVER_THREADS };
 
-    Server( const string         ip,
+    Server( const std::string    ip,
             const unsigned short port,
             const unsigned int   nExecutorThreads );
 
@@ -53,6 +51,5 @@ private:
 
     boost::asio::signal_set         _signals;
 };
-
 
 #endif /* INCLUDE_SERVER_HPP_ */

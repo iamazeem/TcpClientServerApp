@@ -1,3 +1,4 @@
+#include <exception>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -14,9 +15,8 @@ using boost::asio::ip::address;
 using boost::system::error_code;
 using boost::asio::placeholders::error;
 
-
 /* Interface function definitions */
-Server::Server( const string         ip,
+Server::Server( const std::string    ip,
                 const unsigned short port,
                 const unsigned int   nExecutorThreads )
                 :
@@ -34,7 +34,7 @@ Server::Server( const string         ip,
 
     /** Normal initialization flow of the server **/
 
-    LOG_INF() << "Initiating server..." << endl;
+    LOG_INF() << "Initiating server..." << std::endl;
 
     for ( unsigned int i = 0; i < nExecutorThreads; ++i )
     {
@@ -47,7 +47,7 @@ Server::Server( const string         ip,
                             bind( &Server::acceptHandler, this, _newSession, error ) );
 
     lockStream();
-    LOG_INF() << "Server started! [" << _endpoint << "]" << endl;
+    LOG_INF() << "Server started! [" << _endpoint << "]" << std::endl;
     unlockStream();
 }
 
@@ -56,7 +56,7 @@ Server::~Server()
     stop();
 
     lockStream();
-    LOG_INF() << "Server closed successfully! Bye bye! :)" << endl;
+    LOG_INF() << "Server closed successfully! Bye bye! :)" << std::endl;
     unlockStream();
 }
 
@@ -75,8 +75,8 @@ void Server::stop()
     if ( !_iosExecutors->stopped() )
     {
         _iosExecutors->stop();
-        //_thgExecutors.interrupt_all();
-        //_thgExecutors.join_all();
+        // _thgExecutors.interrupt_all();
+        // _thgExecutors.join_all();
     }
 }
 
@@ -90,19 +90,18 @@ void Server::WorkerThreadCallback( shared_ptr<io_service> ios )
         try
         {
             error_code errorCode;
-
             ios->run( errorCode );
             if ( errorCode )
             {
                 lockStream();
-                LOG_ERR() << " Error: " << errorCode.message() << endl;
+                LOG_ERR() << " Error: " << errorCode.message() << std::endl;
                 unlockStream();
             }
         }
-        catch ( exception& ex )
+        catch ( const std::exception& ex )
         {
             lockStream();
-            LOG_ERR() << " Exception: " << ex.what() << endl;
+            LOG_ERR() << " Exception: " << ex.what() << std::endl;
             unlockStream();
         }
     }
@@ -114,7 +113,7 @@ void Server::acceptHandler( shared_ptr<Session> thisSession, const error_code& e
     {
         LOG_INF() << "Connected to client! ["
                   << getPeerIp( thisSession->getSocket() ) << ":"
-                  << getPeerPort( thisSession->getSocket() ) << "]" << endl;
+                  << getPeerPort( thisSession->getSocket() ) << "]" << std::endl;
 
         _iosExecutors->post( bind( &Session::start, thisSession ) );
 

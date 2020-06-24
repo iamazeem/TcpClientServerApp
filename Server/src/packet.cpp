@@ -2,22 +2,23 @@
 #include "packet.hpp"
 #include "utilities.hpp"
 
-using std::istreambuf_iterator;
 using boost::asio::streambuf;
 using boost::asio::read;
 using boost::asio::write;
 using boost::asio::buffer;
 using boost::asio::transfer_exactly;
 
-
-Packet::Packet() : _header{ MSG_VERSION, MSG_DEFAULT, 0 }, _message{""}
+Packet::Packet()
+    :
+    _header{ MSG_VERSION, MSG_DEFAULT, 0 },
+    _message{ "" }
 {
 }
 
 Packet::Packet( const unsigned int version,
                 const unsigned int type,
                 const unsigned int length,
-                const string&      message )
+                const std::string& message )
                 :
                 _header { version, type, length },
                 _message{ message }
@@ -30,13 +31,12 @@ const unsigned int Packet::getLength () const { return _header._length;   }
 const unsigned int Packet::getHdrSize() const { return sizeof(_header);   }
 const unsigned int Packet::getMsgSize() const { return _message.length(); }
 const unsigned int Packet::getPktSize() const { return getHdrSize() + getMsgSize(); }
-const string&      Packet::getMessage() const { return _message;          }
-
+const std::string& Packet::getMessage() const { return _message;          }
 
 void Packet::setVersion( const unsigned int version ) { _header._version = version; }
 void Packet::setType   ( const unsigned int type    ) { _header._type    = type;    }
 void Packet::setLength ( const unsigned int length  ) { _header._length  = length;  }
-void Packet::setMessage( const string&      message ) { _message         = message; }
+void Packet::setMessage( const std::string& message ) { _message         = message; }
 
 void Packet::set ( const unsigned int version,
                    const unsigned int type,
@@ -50,7 +50,7 @@ void Packet::set ( const unsigned int version,
 void Packet::set ( const unsigned int version,
                    const unsigned int type,
                    const unsigned int length,
-                   const string&      message )
+                   const std::string& message )
 {
     set( version, type, length );
     setMessage( message );
@@ -59,46 +59,46 @@ void Packet::set ( const unsigned int version,
 error_code Packet::recv( tcp::socket& socket )
 {
     error_code ec;
-    streambuf  readBuf;
-
     read( socket, buffer( &_header, getHdrSize() ), transfer_exactly( getHdrSize() ), ec );
     if ( ec )
     {
         lockStream();
-        LOG_INF() << "Header read error! " << ec.message() << endl;
+        LOG_INF() << "Header read error! " << ec.message() << std::endl;
         unlockStream();
 
         return ec;
     }
 
-//    lockStream();
-//    LOG_INF() << "Header: "
-//              << std::hex << getVersion() << ", "
-//              << std::hex << getMsgType()    << ", "
-//              << std::dec << getLength()  << endl;
-//    unlockStream();
+    // lockStream();
+    // LOG_INF() << "Header: "
+    //             << std::hex << getVersion() << ", "
+    //             << std::hex << getMsgType()    << ", "
+    //             << std::dec << getLength()  << std::endl;
+    // unlockStream();
 
     const unsigned int readSize = getLength() - getHdrSize();
     if ( readSize > 0 )
     {
-//        lockStream();
-//        LOG_INF() << "Read Size: " << readSize << endl;
-//        unlockStream();
+        // lockStream();
+        // LOG_INF() << "Read Size: " << readSize << std::endl;
+        // unlockStream();
 
-        read( socket, readBuf, transfer_exactly(readSize), ec );
+        streambuf readBuf;
+        read( socket, readBuf, transfer_exactly( readSize ), ec );
         if ( ec )
         {
-            LOG_ERR() << "Message read error! " << ec.message() << endl;
+            LOG_ERR() << "Message read error! " << ec.message() << std::endl;
             return ec;
         }
 
-        const string dataReceived( (istreambuf_iterator< char >( &readBuf )), istreambuf_iterator< char >() );
+        const std::string dataReceived( (std::istreambuf_iterator<char>( &readBuf )),
+                                        std::istreambuf_iterator<char>() );
 
         // Store read message
         setMessage( dataReceived );
 
         lockStream();
-        LOG_INF() << "Received: " << *this << endl;
+        LOG_INF() << "Received: " << *this << std::endl;
         unlockStream();
     }
 
@@ -107,13 +107,12 @@ error_code Packet::recv( tcp::socket& socket )
 
 error_code Packet::send( tcp::socket& socket )
 {
-    error_code ec;
-
     lockStream();
-    LOG_INF() << "Sending packet: " << *this << endl;
+    LOG_INF() << "Sending packet: " << *this << std::endl;
     unlockStream();
 
     // Send packet header
+    error_code ec;
     write( socket, buffer( &_header, getHdrSize() ), transfer_exactly( getHdrSize() ), ec );
     if ( ec )
     {
@@ -121,7 +120,7 @@ error_code Packet::send( tcp::socket& socket )
         LOG_ERR() << "Could not send header! ["
                   << getPeerIp( socket ) << ":"
                   << getPeerPort( socket )
-                  << "]" << endl;
+                  << "]" << std::endl;
         unlockStream();
 
         return ec;
@@ -135,7 +134,7 @@ error_code Packet::send( tcp::socket& socket )
         LOG_ERR() << "Could not send message! ["
                   << getPeerIp( socket ) << ":"
                   << getPeerPort( socket )
-                  << "]" << endl;
+                  << "]" << std::endl;
         unlockStream();
 
         return ec;
@@ -145,7 +144,7 @@ error_code Packet::send( tcp::socket& socket )
     LOG_INF() << "Packet sent! ["
               << getPeerIp( socket ) << ":"
               << getPeerPort( socket )
-              << "]..." << endl;
+              << "]..." << std::endl;
     unlockStream();
 
     // Reset packet message
@@ -156,10 +155,8 @@ error_code Packet::send( tcp::socket& socket )
 
 error_code Packet::processPackets( tcp::socket& socket )
 {
-    error_code ec;
-
     // Send welcome message to client
-    ec = welcomeClient( socket );
+    error_code ec = welcomeClient( socket );
     if ( ec ) return ec;
 
     // Communicate with client using defined protocol
@@ -173,7 +170,7 @@ error_code Packet::processPackets( tcp::socket& socket )
                 if ( getMsgType() == MSG_EXIT )
                 {
                     lockStream();
-                    LOG_INF() << "EXIT packet received! -> " << *this << endl;
+                    LOG_INF() << "EXIT packet received! -> " << *this << std::endl;
                     unlockStream();
                 }
                 else
@@ -182,14 +179,14 @@ error_code Packet::processPackets( tcp::socket& socket )
                     ec = processCommand( getMessage(), socket );
 
                     lockStream();
-                    LOG_INF() << "COMMAND PROCESSING COMPLETED!" << endl;
+                    LOG_INF() << "COMMAND PROCESSING COMPLETED!" << std::endl;
                     unlockStream();
                 }
             }
             else
             {
                 lockStream();
-                LOG_ERR() << "Invalid message format! -> " << *this << endl;
+                LOG_ERR() << "Invalid message format! -> " << *this << std::endl;
                 unlockStream();
             }
         }
@@ -199,7 +196,7 @@ error_code Packet::processPackets( tcp::socket& socket )
               getMessage() != "EXIT" );
 
     lockStream();
-    LOG_INF() << "Session ended with client!" << endl;
+    LOG_INF() << "Session ended with client!" << std::endl;
     unlockStream();
 
     return ec;
@@ -232,24 +229,22 @@ error_code Packet::welcomeClient( tcp::socket& socket )
     if ( ec )
     {
         lockStream();
-        LOG_ERR() << ec.message() << endl;
+        LOG_ERR() << ec.message() << std::endl;
         unlockStream();
     }
 
     lockStream();
-    LOG_INF() << "Welcome message sent! " << *this << endl;
+    LOG_INF() << "Welcome message sent! " << *this << std::endl;
     unlockStream();
 
     return ec;
 }
 
-error_code Packet::processCommand( const string cmd, tcp::socket& socket )
+error_code Packet::processCommand( const std::string cmd, tcp::socket& socket )
 {
     /** For now, only "ls" command is hard-coded! **/
 
-    error_code ec;
-
-    string          cmdOutput;
+    std::string     cmdOutput;
     unsigned int    msgType;
 
     // Execute command and form output message
@@ -269,16 +264,16 @@ error_code Packet::processCommand( const string cmd, tcp::socket& socket )
     set( MSG_VERSION, msgType, getPktSize() );
 
     // Send command output
-    ec = send( socket );
+    error_code ec = send( socket );
     if ( ec )
     {
         lockStream();
-        LOG_ERR() << ec.message() << endl;
+        LOG_ERR() << ec.message() << std::endl;
         unlockStream();
     }
 
     lockStream();
-    LOG_INF() << "Command output sent!" << endl;
+    LOG_INF() << "Command output sent!" << std::endl;
     unlockStream();
 
     // Acknowledge client response
@@ -289,9 +284,7 @@ error_code Packet::processCommand( const string cmd, tcp::socket& socket )
 
 error_code Packet::ackClientRsp( tcp::socket& socket )
 {
-    error_code ec;
-
-    ec = recv( socket );
+    const error_code ec = recv( socket );
     if ( ec ) return ec;
 
     if ( isValidVersion() && isValidMsgType() )
@@ -300,13 +293,13 @@ error_code Packet::ackClientRsp( tcp::socket& socket )
              getMsgType() == MSG_FIN_DATA_ACK )
         {
             lockStream();
-            LOG_INF() << "Acknowledgment received from client!" << endl;
+            LOG_INF() << "Acknowledgment received from client!" << std::endl;
             unlockStream();
         }
         else
         {
             lockStream();
-            LOG_ERR() << "Invalid message format! -> " << *this << endl;
+            LOG_ERR() << "Invalid message format! -> " << *this << std::endl;
             unlockStream();
         }
     }

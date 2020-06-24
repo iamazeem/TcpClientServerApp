@@ -10,11 +10,10 @@ using boost::asio::ip::tcp;
 using boost::asio::io_service;
 using boost::system::error_code;
 
-
 class Client
 {
 public:
-	Client( const string         ip,
+	Client( const std::string    ip,
 	        const unsigned short port );
 
 	~Client();
@@ -31,6 +30,5 @@ private:
 
 	Packet          _packet;
 };
-
 
 #endif /* INCLUDE_CLIENT_HPP_ */
