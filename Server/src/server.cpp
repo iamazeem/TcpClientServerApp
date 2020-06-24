@@ -60,12 +60,12 @@ Server::~Server()
     unlockStream();
 }
 
-void Server::start( void )
+void Server::start()
 {
     _iosAcceptors->run();
 }
 
-void Server::stop( void )
+void Server::stop()
 {
     if ( !_iosAcceptors->stopped() )
     {

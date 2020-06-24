@@ -16,10 +16,10 @@ class Session
 public:
     Session( shared_ptr<io_service> ios );
 
-    void start( void );
-    void stop ( void );
+    void start();
+    void stop ();
 
-    tcp::socket& getSocket( void );
+    tcp::socket& getSocket();
 
 private:
     shared_ptr<io_service>  _ios;

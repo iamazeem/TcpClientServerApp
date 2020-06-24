@@ -11,12 +11,12 @@ Session::Session( shared_ptr<io_service> ios ) : _ios{ ios }, _socket{ *_ios }, 
 {
 }
 
-tcp::socket& Session::getSocket( void )
+tcp::socket& Session::getSocket()
 {
     return _socket;
 }
 
-void Session::start( void )
+void Session::start()
 {
     try
     {
@@ -32,7 +32,7 @@ void Session::start( void )
     }
 }
 
-void Session::stop( void )
+void Session::stop()
 {
     _socket.shutdown( boost::asio::socket_base::shutdown_both );
     _socket.close();

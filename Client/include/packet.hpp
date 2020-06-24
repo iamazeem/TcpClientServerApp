@@ -19,13 +19,13 @@ public:
             const unsigned int length,
             const string&      message );
 
-    const unsigned int getVersion( void ) const;
-    const unsigned int getMsgType( void ) const;
-    const unsigned int getLength ( void ) const;
-    const unsigned int getHdrSize( void ) const;
-    const unsigned int getMsgSize( void ) const;
-    const unsigned int getPktSize( void ) const;
-    const string&      getMessage( void ) const;
+    const unsigned int getVersion() const;
+    const unsigned int getMsgType() const;
+    const unsigned int getLength () const;
+    const unsigned int getHdrSize() const;
+    const unsigned int getMsgSize() const;
+    const unsigned int getPktSize() const;
+    const string&      getMessage() const;
 
     void setVersion( const unsigned int version );
     void setType   ( const unsigned int type    );
@@ -49,8 +49,8 @@ public:
     friend std::ostream& operator<<( std::ostream& os, const Packet& packet );
 
 private:
-    bool isValidVersion( void );
-    bool isValidMsgType( void );
+    bool isValidVersion();
+    bool isValidMsgType();
 
     struct Header
     {

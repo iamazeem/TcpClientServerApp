@@ -24,13 +24,13 @@ Packet::Packet( const unsigned int version,
 {
 }
 
-const unsigned int Packet::getVersion( void ) const { return _header._version;  }
-const unsigned int Packet::getMsgType( void ) const { return _header._type;     }
-const unsigned int Packet::getLength ( void ) const { return _header._length;   }
-const unsigned int Packet::getHdrSize( void ) const { return sizeof(_header);   }
-const unsigned int Packet::getMsgSize( void ) const { return _message.length(); }
-const unsigned int Packet::getPktSize( void ) const { return getHdrSize() + getMsgSize(); }
-const string&      Packet::getMessage( void ) const { return _message;          }
+const unsigned int Packet::getVersion() const { return _header._version;  }
+const unsigned int Packet::getMsgType() const { return _header._type;     }
+const unsigned int Packet::getLength () const { return _header._length;   }
+const unsigned int Packet::getHdrSize() const { return sizeof(_header);   }
+const unsigned int Packet::getMsgSize() const { return _message.length(); }
+const unsigned int Packet::getPktSize() const { return getHdrSize() + getMsgSize(); }
+const string&      Packet::getMessage() const { return _message;          }
 
 
 void Packet::setVersion( const unsigned int version ) { _header._version = version; }
@@ -235,12 +235,12 @@ std::ostream& operator<<( std::ostream& os, const Packet& packet )
     return os;
 }
 
-bool Packet::isValidVersion( void )
+bool Packet::isValidVersion()
 {
     return ( getVersion() == MSG_VERSION );
 }
 
-bool Packet::isValidMsgType( void )
+bool Packet::isValidMsgType()
 {
     return ( getMsgType() == MSG_COMMAND      ||
              getMsgType() == MSG_DATA_ACK     ||

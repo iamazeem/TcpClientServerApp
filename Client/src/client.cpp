@@ -24,7 +24,7 @@ Client::~Client()
     LOG_INF() << "Client exited successfully!" << endl;
 }
 
-void Client::start( void )
+void Client::start()
 {
     if ( !connectToServer() ) { return; }
 
@@ -33,12 +33,12 @@ void Client::start( void )
     stop();
 }
 
-void Client::stop ( void )
+void Client::stop ()
 {
     _socket.close();
 }
 
-bool Client::connectToServer( void )
+bool Client::connectToServer()
 {
     bool isConnected = true;
 

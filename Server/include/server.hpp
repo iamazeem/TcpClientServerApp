@@ -29,14 +29,14 @@ public:
 
     ~Server();
 
-    void start( void );
-    void stop ( void );
+    void start();
+    void stop ();
 
 private:
     void WorkerThreadCallback( shared_ptr<io_service> ios );
 
     void acceptHandler( shared_ptr<Session> thisSession, const error_code& ec );
-    void acceptNewConn( void );
+    void acceptNewConn();
 
     shared_ptr<io_service>          _iosAcceptors;
     shared_ptr<io_service::work>    _wrkAcceptors;

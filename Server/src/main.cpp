@@ -2,7 +2,7 @@
 #include "server.hpp"
 
 
-int main( void )
+int main()
 {
     Server server{ SERVER_IP, SERVER_PORT, SERVER_THREADS };
     server.start();

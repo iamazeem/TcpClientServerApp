@@ -2,7 +2,7 @@
 #include "client.hpp"
 
 
-int main( void )
+int main()
 {
     Client client{ SERVER_IP, SERVER_PORT };
     client.start();

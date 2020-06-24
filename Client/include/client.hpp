@@ -19,11 +19,11 @@ public:
 
 	~Client();
 
-	void start( void );
-	void stop ( void );
+	void start();
+	void stop ();
 
 private:
-	bool connectToServer( void );
+	bool connectToServer();
 
 	io_service      _ios;
 	tcp::endpoint   _endpoint;
