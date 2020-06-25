@@ -2,7 +2,7 @@
 
 Async TCP Client / Server App (Protocol based) using C++ Boost::Asio
 
-## How to build?
+## Build Instructions
 
 Prerequisites: CMake
 
@@ -13,20 +13,4 @@ $ mkdir build
 $ cd build
 $ cmake ..
 $ make
-```
-
-## How to run?
-
-Make sure you're `build` folder i.e. `Server/build` and `Client/build`.
-
-### Server
-
-```
-$ ./Server
-```
-
-### Client
-
-```
-$ ./Client
 ```
