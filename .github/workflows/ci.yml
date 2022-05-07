@@ -17,6 +17,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Install Dependencies
+      run: |
+        apt install libboost-all-dev
+
     - name: Build
       run: |
         mkdir build && cd build
