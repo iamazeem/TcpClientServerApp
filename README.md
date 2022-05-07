@@ -7,14 +7,12 @@ This repo contains the asynchronous protocol-based
 server applications using
 [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html).
 
-## Build
-
-Prerequisites:
+## Dependencies
 
 - [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
 - [CMake](https://cmake.org/)
 
-Clone and build:
+## Build
 
 ```shell
 git clone git@github.com:iamazeem/TcpClientServerApp.git
