@@ -1,12 +1,9 @@
-#ifndef INCLUDE_UTILITIES_HPP_
-#define INCLUDE_UTILITIES_HPP_
+#pragma once
 
 #include <string>
 #include <boost/asio.hpp>
 
 using boost::asio::ip::tcp;
 
-std::string    getPeerIp  ( const tcp::socket& socket );
-unsigned short getPeerPort( const tcp::socket& socket );
-
-#endif /* INCLUDE_UTILITIES_HPP_ */
+std::string get_peer_ip(const tcp::socket &socket) noexcept;
+unsigned short get_peer_port(const tcp::socket &socket) noexcept;

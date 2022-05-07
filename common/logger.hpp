@@ -1,53 +1,52 @@
-#ifndef INCLUDE_LOGGER_HPP_
-#define INCLUDE_LOGGER_HPP_
+#pragma once
 
 #include "common.hpp"
 
-/** Logging Macros **/
-
 #define LOG_INF() \
-        Logger::log( Logger::Level::INF, __FILE__, __FUNCTION__, __LINE__ )
+    logger::log(logger::level::INF, __FILE__, __FUNCTION__, __LINE__)
 
 #define LOG_WRN() \
-        Logger::log( Logger::Level::WRN, __FILE__, __FUNCTION__, __LINE__ )
+    logger::log(logger::level::WRN, __FILE__, __FUNCTION__, __LINE__)
 
 #define LOG_ERR() \
-        Logger::log( Logger::Level::ERR, __FILE__, __FUNCTION__, __LINE__ )
+    logger::log(logger::level::ERR, __FILE__, __FUNCTION__, __LINE__)
 
-/** Logger Class - Definition **/
-
-class Logger
+class logger final
 {
 public:
-    enum class Level : unsigned int { INF, WRN, ERR };
-
-    static inline std::ostream& log( const Level  level,
-                                     const char*  file,
-                                     const char*  func,
-                                     unsigned int line )
+    enum class level : unsigned int
     {
-        std::string strLogLvl;
+        INF,
+        WRN,
+        ERR
+    };
 
-        switch ( level )
+    static inline std::ostream &log(const level level,
+                                    const char *file,
+                                    const char *func,
+                                    unsigned int line)
+    {
+        std::string level_str;
+        switch (level)
         {
-            case Level::INF:
-                strLogLvl = "[INF]";
-                break;
+        case level::INF:
+            level_str = "[INF]";
+            break;
 
-            case Level::WRN:
-                strLogLvl = "[WRN]";
-                break;
+        case level::WRN:
+            level_str = "[WRN]";
+            break;
 
-            case Level::ERR:
-                strLogLvl = "[ERR]";
-                break;
+        case level::ERR:
+            level_str = "[ERR]";
+            break;
         }
 
-        std::cout << strLogLvl << " : "
-                  << file << ": " << func << "(): " << line << ": ";
+        std::cout << level_str << " : "
+                  << file << ": "
+                  << func << "(): "
+                  << line << ": ";
 
         return std::cout;
     }
 };
-
-#endif /* INCLUDE_LOGGER_HPP_ */

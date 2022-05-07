@@ -1,4 +1,3 @@
-#include <sstream>
 #include <exception>
 
 #include "common.hpp"
@@ -6,38 +5,35 @@
 #include "packet.hpp"
 #include "utilities.hpp"
 
-/** Interface function definitions **/
-Session::Session( shared_ptr<io_service> ios )
-    :
-    _ios{ ios },
-    _socket{ *_ios },
-    _packet{}
+session::session(shared_ptr<io_service> ios) noexcept
+    : m_io_service{ios},
+      m_socket{*m_io_service},
+      m_packet{}
 {
 }
 
-tcp::socket& Session::getSocket()
+tcp::socket &session::get_socket() noexcept
 {
-    return _socket;
+    return m_socket;
 }
 
-void Session::start()
+void session::start() noexcept
 {
     try
     {
-        _packet.processPackets( _socket );
-
+        m_packet.process(m_socket);
         stop();
     }
-    catch ( const std::exception& ex )
+    catch (const std::exception &e)
     {
-        lockStream();
-        LOG_ERR() << "Exception: " << ex.what() << std::endl;
-        unlockStream();
+        lock_stream();
+        LOG_ERR() << "Exception: " << e.what() << std::endl;
+        unlock_stream();
     }
 }
 
-void Session::stop()
+void session::stop() noexcept
 {
-    _socket.shutdown( boost::asio::socket_base::shutdown_both );
-    _socket.close();
+    m_socket.shutdown(boost::asio::socket_base::shutdown_both);
+    m_socket.close();
 }

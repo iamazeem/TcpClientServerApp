@@ -1,5 +1,4 @@
-#ifndef INCLUDE_SERVER_HPP_
-#define INCLUDE_SERVER_HPP_
+#pragma once
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -10,46 +9,37 @@
 
 #include "session.hpp"
 
-using boost::shared_ptr;
-using boost::asio::ip::tcp;
-using boost::asio::io_service;
-using boost::system::error_code;
 using boost::enable_shared_from_this;
+using boost::shared_ptr;
+using boost::asio::io_service;
+using boost::asio::ip::tcp;
+using boost::system::error_code;
 
-class Server final
+class server final
 {
 public:
-    // enum class Defaults : unsigned int { EXECUTOR_THREADS = SERVER_THREADS };
+    server(const std::string ip, const unsigned short port,
+           const unsigned int num_threads) noexcept;
+    ~server() noexcept;
 
-    Server( const std::string    ip,
-            const unsigned short port,
-            const unsigned int   nExecutorThreads );
-
-    ~Server();
-
-    void start();
-    void stop ();
+    void start() noexcept;
+    void stop() noexcept;
 
 private:
-    void WorkerThreadCallback( shared_ptr<io_service> ios );
+    void worker_thread_callback(shared_ptr<io_service> ios) noexcept;
+    void accept_handler(shared_ptr<session> this_session, const error_code &ec) noexcept;
+    void accept_new_connection() noexcept;
 
-    void acceptHandler( shared_ptr<Session> thisSession, const error_code& ec );
-    void acceptNewConn();
+    shared_ptr<io_service> m_ios_acceptors;
+    shared_ptr<io_service::work> m_ios_work_acceptors;
+    shared_ptr<io_service> m_ios_executors;
+    shared_ptr<io_service::work> m_ios_work_executors;
+    boost::thread_group m_executors_thread_group;
 
-    shared_ptr<io_service>          _iosAcceptors;
-    shared_ptr<io_service::work>    _wrkAcceptors;
+    tcp::endpoint m_endpoint;
+    tcp::acceptor m_acceptor;
 
-    shared_ptr<io_service>          _iosExecutors;
-    shared_ptr<io_service::work>    _wrkExecutors;
+    shared_ptr<session> m_session;
 
-    boost::thread_group             _thgExecutors;
-
-    tcp::endpoint                   _endpoint;
-    tcp::acceptor                   _acceptor;
-
-    shared_ptr<Session>             _newSession;
-
-    boost::asio::signal_set         _signals;
+    boost::asio::signal_set m_signals;
 };
-
-#endif /* INCLUDE_SERVER_HPP_ */

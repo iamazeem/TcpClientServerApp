@@ -13,111 +13,103 @@ using boost::asio::ip::address;
 using boost::asio::placeholders::error;
 using boost::system::error_code;
 
-/* Interface function definitions */
-Server::Server( const std::string    ip,
-                const unsigned short port,
-                const unsigned int   nExecutorThreads )
-                :
-                _iosAcceptors{ boost::make_shared<io_service>() },
-                _wrkAcceptors{ boost::make_shared<io_service::work>( *_iosAcceptors ) },
-                _iosExecutors{ boost::make_shared<io_service>() },
-                _wrkExecutors{ boost::make_shared<io_service::work>( *_iosExecutors ) },
-                _endpoint    { address::from_string(ip), port },
-                _acceptor    { *_iosAcceptors, _endpoint },
-                _newSession  { boost::make_shared<Session>( _iosExecutors ) },
-                _signals     { *_iosAcceptors, SIGINT, SIGTERM }
+server::server(const std::string ip, const unsigned short port,
+               const unsigned int num_threads) noexcept
+    : m_ios_acceptors{boost::make_shared<io_service>()},
+      m_ios_work_acceptors{boost::make_shared<io_service::work>(*m_ios_acceptors)},
+      m_ios_executors{boost::make_shared<io_service>()},
+      m_ios_work_executors{boost::make_shared<io_service::work>(*m_ios_executors)},
+      m_endpoint{address::from_string(ip), port},
+      m_acceptor{*m_ios_acceptors, m_endpoint},
+      m_session{boost::make_shared<session>(m_ios_executors)},
+      m_signals{*m_ios_acceptors, SIGINT, SIGTERM}
 {
-    /** Add signal handling for graceful termination (CTRL + C) **/
-    _signals.async_wait( boost::bind( &Server::stop, this ) );
-
-    /** Normal initialization flow of the server **/
+    // Add signal handling for graceful termination (CTRL + C)
+    m_signals.async_wait(boost::bind(&server::stop, this));
 
     LOG_INF() << "Initiating server..." << std::endl;
-
-    for ( unsigned int i = 0; i < nExecutorThreads; ++i )
+    for (unsigned int i = 0; i < num_threads; ++i)
     {
-        _thgExecutors.create_thread( boost::bind( &Server::WorkerThreadCallback,
-                                                  this,
-                                                  _iosExecutors ) );
+        m_executors_thread_group.create_thread(boost::bind(&server::worker_thread_callback,
+                                                           this,
+                                                           m_ios_executors));
     }
 
-    _acceptor.async_accept( _newSession->getSocket(),
-                            boost::bind( &Server::acceptHandler, this, _newSession, error ) );
+    m_acceptor.async_accept(m_session->get_socket(),
+                            boost::bind(&server::accept_handler, this, m_session, error));
 
-    lockStream();
-    LOG_INF() << "Server started! [" << _endpoint << "]" << std::endl;
-    unlockStream();
+    lock_stream();
+    LOG_INF() << "Server started! [" << m_endpoint << "]" << std::endl;
+    unlock_stream();
 }
 
-Server::~Server()
+server::~server() noexcept
 {
     stop();
 
-    lockStream();
+    lock_stream();
     LOG_INF() << "Server closed successfully! Bye bye! :)" << std::endl;
-    unlockStream();
+    unlock_stream();
 }
 
-void Server::start()
+void server::start() noexcept
 {
-    _iosAcceptors->run();
+    m_ios_acceptors->run();
 }
 
-void Server::stop()
+void server::stop() noexcept
 {
-    if ( !_iosAcceptors->stopped() )
+    if (!m_ios_acceptors->stopped())
     {
-        _iosAcceptors->stop();
+        m_ios_acceptors->stop();
     }
 
-    if ( !_iosExecutors->stopped() )
+    if (!m_ios_executors->stopped())
     {
-        _iosExecutors->stop();
-        // _thgExecutors.interrupt_all();
-        // _thgExecutors.join_all();
+        m_ios_executors->stop();
+        // m_executors_thread_group.interrupt_all();
+        // m_executors_thread_group.join_all();
     }
 }
 
-/** Utility function definitions **/
+// Utility methods
 
-/* WorkerThread Callback Skeleton */
-void Server::WorkerThreadCallback( boost::shared_ptr<io_service> ios )
+void server::worker_thread_callback(boost::shared_ptr<io_service> ios) noexcept
 {
-    while ( true )
+    while (true)
     {
         try
         {
-            error_code errorCode;
-            ios->run( errorCode );
-            if ( errorCode )
+            error_code ec;
+            ios->run(ec);
+            if (ec)
             {
-                lockStream();
-                LOG_ERR() << " Error: " << errorCode.message() << std::endl;
-                unlockStream();
+                lock_stream();
+                LOG_ERR() << " Error: " << ec.message() << std::endl;
+                unlock_stream();
             }
         }
-        catch ( const std::exception& ex )
+        catch (const std::exception &e)
         {
-            lockStream();
-            LOG_ERR() << " Exception: " << ex.what() << std::endl;
-            unlockStream();
+            lock_stream();
+            LOG_ERR() << " Exception: " << e.what() << std::endl;
+            unlock_stream();
         }
     }
 }
 
-void Server::acceptHandler( boost::shared_ptr<Session> thisSession, const error_code& ec )
+void server::accept_handler(boost::shared_ptr<session> this_session, const error_code &ec) noexcept
 {
-    if ( !ec )
+    if (!ec)
     {
-        LOG_INF() << "Connected to client! ["
-                  << getPeerIp( thisSession->getSocket() ) << ":"
-                  << getPeerPort( thisSession->getSocket() ) << "]" << std::endl;
+        LOG_INF() << "Connection established with client! ["
+                  << get_peer_ip(this_session->get_socket()) << ":"
+                  << get_peer_port(this_session->get_socket()) << "]" << std::endl;
 
-        _iosExecutors->post( boost::bind( &Session::start, thisSession ) );
+        m_ios_executors->post(boost::bind(&session::start, this_session));
 
-        _newSession = boost::make_shared<Session>( _iosExecutors );
-
-        _acceptor.async_accept( _newSession->getSocket(),
-                                boost::bind( &Server::acceptHandler, this, _newSession, error ) );
+        m_session = boost::make_shared<session>(m_ios_executors);
+        m_acceptor.async_accept(m_session->get_socket(),
+                                boost::bind(&server::accept_handler, this, m_session, error));
     }
 }

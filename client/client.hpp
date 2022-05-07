@@ -1,34 +1,28 @@
-#ifndef INCLUDE_CLIENT_HPP_
-#define INCLUDE_CLIENT_HPP_
+#pragma once
 
 #include <boost/asio.hpp>
 
 #include "common.hpp"
 #include "packet.hpp"
 
-using boost::asio::ip::tcp;
 using boost::asio::io_service;
+using boost::asio::ip::tcp;
 using boost::system::error_code;
 
-class Client
+class client final
 {
 public:
-	Client( const std::string    ip,
-	        const unsigned short port );
+    client(const std::string ip, const unsigned short port) noexcept;
+    ~client() noexcept;
 
-	~Client();
-
-	void start();
-	void stop ();
+    void start() noexcept;
 
 private:
-	bool connectToServer();
+    bool connect() noexcept;
+    void disconnect() noexcept;
 
-	io_service      _ios;
-	tcp::endpoint   _endpoint;
-	tcp::socket     _socket;
-
-	Packet          _packet;
+    io_service m_io_service;
+    tcp::endpoint m_endpoint;
+    tcp::socket m_socket;
+    packet m_packet;
 };
-
-#endif /* INCLUDE_CLIENT_HPP_ */

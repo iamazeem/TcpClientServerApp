@@ -2,70 +2,68 @@
 #include "packet.hpp"
 
 using boost::asio::ip::address;
-using boost::system::error_code;
 using boost::asio::placeholders::error;
+using boost::system::error_code;
 
-Client::Client( const std::string    ip,
-                const unsigned short port )
-                :
-                _endpoint( address::from_string( ip ), port ),
-                _socket( _ios )
+client::client(const std::string ip, const unsigned short port) noexcept
+    : m_endpoint{address::from_string(ip), port},
+      m_socket{m_io_service}
 {
-    LOG_INF() << "Initiating client..." << std::endl;
-    LOG_INF() << "Got server end-point: [" << _endpoint << "]" << std::endl;
+    LOG_INF() << "Initiating client... [" << m_endpoint << "]" << std::endl;
 }
 
-Client::~Client()
+client::~client() noexcept
 {
-    stop();
-
+    disconnect();
     LOG_INF() << "Client exited successfully!" << std::endl;
 }
 
-void Client::start()
+void client::start() noexcept
 {
-    if ( !connectToServer() ) { return; }
-
-    _packet.processPackets( _socket );
-
-    stop();
+    if (connect())
+    {
+        m_packet.process(m_socket);
+    }
 }
 
-void Client::stop ()
+bool client::connect() noexcept
 {
-    _socket.close();
-}
-
-bool Client::connectToServer()
-{
-    bool isConnected = true;
+    bool is_connected = true;
 
     LOG_INF() << "Connecting to server..." << std::endl;
 
     try
     {
         error_code ec;
-        _socket.connect( _endpoint, ec );
-        if ( ec )
+        m_socket.connect(m_endpoint, ec);
+        if (ec)
         {
             LOG_ERR() << "Error: " << ec.message() << std::endl;
-            isConnected = false;
+            is_connected = false;
         }
     }
-    catch ( const std::exception& ex )
+    catch (const std::exception &e)
     {
-        LOG_ERR() << "Exception: " << ex.what() << std::endl;
-        isConnected = false;
+        LOG_ERR() << "Exception: " << e.what() << std::endl;
+        is_connected = false;
     }
 
-    if ( isConnected )
+    if (is_connected)
     {
-        LOG_INF() << "Successfully connected to the server!" << std::endl;
+        LOG_INF() << "Connected successfully!" << std::endl;
     }
     else
     {
-        LOG_ERR() << "Unable to connect to the server!" << std::endl;
+        LOG_ERR() << "Failed to connect to the server!" << std::endl;
     }
 
-    return isConnected;
+    return is_connected;
+}
+
+void client::disconnect() noexcept
+{
+    if (m_socket.is_open())
+    {
+        m_socket.close();
+    }
 }

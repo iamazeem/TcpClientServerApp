@@ -1,31 +1,26 @@
-#ifndef INCLUDE_SESSION_HPP_
-#define INCLUDE_SESSION_HPP_
+#pragma once
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "packet.hpp"
 
-using boost::asio::ip::tcp;
-using boost::asio::io_service;
 using boost::shared_ptr;
+using boost::asio::io_service;
+using boost::asio::ip::tcp;
 
-
-class Session
+class session final
 {
 public:
-    Session( shared_ptr<io_service> ios );
+    session(shared_ptr<io_service> ios) noexcept;
 
-    void start();
-    void stop ();
+    void start() noexcept;
+    void stop() noexcept;
 
-    tcp::socket& getSocket();
+    tcp::socket &get_socket() noexcept;
 
 private:
-    shared_ptr<io_service>  _ios;
-    tcp::socket             _socket;
-    Packet                  _packet;
+    shared_ptr<io_service> m_io_service;
+    tcp::socket m_socket;
+    packet m_packet;
 };
-
-
-#endif /* INCLUDE_SESSION_HPP_ */

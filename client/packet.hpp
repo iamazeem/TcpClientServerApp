@@ -1,5 +1,4 @@
-#ifndef INCLUDE_PACKET_HPP_
-#define INCLUDE_PACKET_HPP_
+#pragma once
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
@@ -8,60 +7,60 @@
 using boost::asio::ip::tcp;
 using boost::system::error_code;
 
-class Packet
+class packet final
 {
 public:
-    Packet();
+    packet() noexcept;
+    packet(const unsigned int version,
+           const unsigned int type,
+           const unsigned int length,
+           const std::string message) noexcept;
 
-    Packet( const unsigned int version,
-            const unsigned int type,
-            const unsigned int length,
-            const std::string& message );
+    unsigned int get_version() const noexcept;
+    unsigned int get_message_type() const noexcept;
+    unsigned int get_length() const noexcept;
+    unsigned int get_header_size() const noexcept;
+    unsigned int get_message_size() const noexcept;
+    unsigned int get_packet_size() const noexcept;
+    std::string get_message() const noexcept;
 
-    const unsigned int getVersion() const;
-    const unsigned int getMsgType() const;
-    const unsigned int getLength () const;
-    const unsigned int getHdrSize() const;
-    const unsigned int getMsgSize() const;
-    const unsigned int getPktSize() const;
-    const std::string& getMessage() const;
+    void set_version(const unsigned int version) noexcept;
+    void set_type(const unsigned int type) noexcept;
+    void set_length(const unsigned int length) noexcept;
+    void set_message(const std::string message) noexcept;
 
-    void setVersion( const unsigned int version );
-    void setType   ( const unsigned int type    );
-    void setLength ( const unsigned int length  );
-    void setMessage( const std::string& message );
+    void set(const unsigned int version,
+             const unsigned int type,
+             const unsigned int length) noexcept;
+    void set(const unsigned int version,
+             const unsigned int type,
+             const unsigned int length,
+             const std::string message) noexcept;
 
-    void set ( const unsigned int version,
-               const unsigned int type,
-               const unsigned int length );
+    error_code recv(tcp::socket &socket) noexcept;
+    error_code send(tcp::socket &socket) noexcept;
+    error_code process(tcp::socket &socket) noexcept;
 
-    void set ( const unsigned int version,
-               const unsigned int type,
-               const unsigned int length,
-               const std::string& message );
-
-    error_code recv( tcp::socket& socket );
-    error_code send( tcp::socket& socket );
-
-    error_code processPackets( tcp::socket& socket );
-
-    friend std::ostream& operator<<( std::ostream& os, const Packet& packet );
+    friend std::ostream &operator<<(std::ostream &os, const packet &packet);
 
 private:
-    bool isValidVersion();
-    bool isValidMsgType();
+    bool is_valid_version() const noexcept;
+    bool is_valid_msg_type() const noexcept;
 
-    struct Header
+    struct header final
     {
-        enum { VERSION_SIZE = 3, TYPE_SIZE = 5, LENGTH_SIZE = 16 };
+        enum
+        {
+            VERSION_SIZE = 3,
+            TYPE_SIZE = 5,
+            LENGTH_SIZE = 16
+        };
 
-        unsigned int    _version : VERSION_SIZE;
-        unsigned int    _type    : TYPE_SIZE;
-        unsigned int    _length  : LENGTH_SIZE;
+        unsigned int m_version : VERSION_SIZE;
+        unsigned int m_type : TYPE_SIZE;
+        unsigned int m_length : LENGTH_SIZE;
     };
 
-    Header              _header;
-    std::string         _message;
+    header m_header;
+    std::string m_message;
 };
-
-#endif /* INCLUDE_PACKET_HPP_ */

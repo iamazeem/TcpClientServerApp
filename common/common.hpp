@@ -1,5 +1,4 @@
-#ifndef INCLUDE_COMMON_HPP_
-#define INCLUDE_COMMON_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -7,8 +6,10 @@
 
 #include "logger.hpp"
 
-static  boost::mutex    globalStreamLock;
-#define lockStream()    globalStreamLock.lock()
-#define unlockStream()  globalStreamLock.unlock()
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 9900
+#define SERVER_THREADS 10
 
-#endif /* INCLUDE_COMMON_HPP_ */
+static boost::mutex globalStreamLock;
+#define lock_stream() globalStreamLock.lock()
+#define unlock_stream() globalStreamLock.unlock()

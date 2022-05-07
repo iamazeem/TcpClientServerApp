@@ -1,8 +1,6 @@
-#ifndef INCLUDE_MESSAGE_HPP_
-#define INCLUDE_MESSAGE_HPP_
+#pragma once
 
-
-/** Macro Replacements for Message **/
+// Macro Replacements for Message
 
 #define MSG_VERSION             0x2
 
@@ -19,6 +17,3 @@
 #define MSG_DATA_ACK            0x12
 #define MSG_FIN_DATA_ACK        0x1F
 #define MSG_EXIT                0x1D
-
-
-#endif /* INCLUDE_MESSAGE_HPP_ */
