@@ -19,7 +19,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        apt install libboost-all-dev
+        sudo apt install libboost-all-dev
 
     - name: Build
       run: |
