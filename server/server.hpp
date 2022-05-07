@@ -16,10 +16,10 @@ using boost::asio::io_service;
 using boost::system::error_code;
 using boost::enable_shared_from_this;
 
-class Server : public boost::noncopyable
+class Server final
 {
 public:
-    enum class Defaults : unsigned int { EXECUTOR_THREADS = SERVER_THREADS };
+    // enum class Defaults : unsigned int { EXECUTOR_THREADS = SERVER_THREADS };
 
     Server( const std::string    ip,
             const unsigned short port,

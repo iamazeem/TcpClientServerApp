@@ -5,49 +5,41 @@ This repo contains the asynchronous protocol-based
 server applications using
 [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html).
 
-The `message.hpp/cpp` and `packet.hpp/cpp` header and source files contain the
-message types and format that both the client and server can understand.
-
 ## Build
 
-Prerequisites: [CMake](https://cmake.org/)
+Prerequisites:
 
-Clone the repo via SSH:
+- [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
+- [CMake](https://cmake.org/)
+
+Clone and build:
 
 ```shell
 git clone git@github.com:iamazeem/TcpClientServerApp.git
-```
-
-or HTTPS:
-
-```shell
-git clone https://github.com/iamazeem/TcpClientServerApp.git
-```
-
-and follow the instructions below.
-
-### Server
-
-On a terminal, run:
-
-```shell
-cd Server
+cd TcpClientServerApp
 mkdir build
 cd build
 cmake ..
 make
 ```
 
-### Client
+The client and server binaries will be generated:
 
-On another terminal, run:
+- `./server/server`
+- `./client/client`
+
+## Run
+
+Run `server` on one terminal:
 
 ```shell
-cd Client
-mkdir build
-cd build
-cmake ..
-make
+./server/server
+```
+
+Run `client` on another terminal:
+
+```shell
+./client/client
 ```
 
 ## License
