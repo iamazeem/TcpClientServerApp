@@ -1,5 +1,7 @@
 # TcpClientServerApp
 
+[![ci](https://github.com/iamazeem/TcpClientServerApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/iamazeem/TcpClientServerApp/actions/workflows/ci.yml)
+
 This repo contains the asynchronous protocol-based
 [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) client and
 server applications using
