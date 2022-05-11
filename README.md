@@ -4,11 +4,12 @@
 
 This repo contains the asynchronous protocol-based
 [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) client and
-server applications using
+server applications using C++ and
 [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html).
 
 ## Dependencies
 
+- C++11 or above
 - [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
 - [CMake](https://cmake.org/)
 
