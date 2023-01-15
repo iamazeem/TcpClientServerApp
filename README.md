@@ -1,6 +1,8 @@
 # TcpClientServerApp
 
 [![ci](https://github.com/iamazeem/TcpClientServerApp/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/iamazeem/TcpClientServerApp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-darkgreen.svg?style=flat-square)](./LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20A%20Coffee-orange.svg?style=flat-square)](https://www.buymeacoffee.com/iamazeem)
 
 This repo contains the asynchronous protocol-based
 [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) client and
@@ -18,10 +20,8 @@ server applications using C++ and
 ```shell
 git clone git@github.com:iamazeem/TcpClientServerApp.git
 cd TcpClientServerApp
-mkdir build
-cd build
-cmake ..
-make
+cmake -S . -B build
+cmake --build build
 ```
 
 The client and server binaries will be generated:
