@@ -25,4 +25,4 @@ jobs:
       run: |
         cmake -S . -B build
         cmake --build build
-        ls -Gghl ./server/server ./client/client
+        ls -Gghl build
