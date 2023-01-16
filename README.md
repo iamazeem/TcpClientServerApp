@@ -24,23 +24,23 @@ cmake -S . -B build
 cmake --build build
 ```
 
-The client and server binaries will be generated:
+The client and server binaries will be generated under `build` directory:
 
-- `./server/server`
-- `./client/client`
+- `./build/server/server`
+- `./build/client/client`
 
 ## Run
 
 Run `server` on one terminal:
 
 ```shell
-./server/server
+./build/server/server
 ```
 
 Run `client` on another terminal:
 
 ```shell
-./client/client
+./build/client/client
 ```
 
 ## License
