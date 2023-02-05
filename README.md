@@ -10,7 +10,6 @@ server applications using C++ and
 [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
 
 ```mermaid
-%%{init: {'theme':'dark'}}%%
 sequenceDiagram
     participant client
     participant server
