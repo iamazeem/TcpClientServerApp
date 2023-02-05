@@ -4,10 +4,22 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-darkgreen.svg?style=flat-square)](./LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20A%20Coffee-orange.svg?style=flat-square)](https://www.buymeacoffee.com/iamazeem)
 
-This repo contains the asynchronous protocol-based
+A sample asynchronous protocol-based
 [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) client and
 server applications using C++ and
-[Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html).
+[Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
+
+```mermaid
+sequenceDiagram
+    participant client
+    participant server
+    client-->>server: connect
+    server->>client: welcome
+    client->>server: command
+    server->>client: output
+    client->>server: exit
+    server-->>client: disconnect
+```
 
 ## Dependencies
 
