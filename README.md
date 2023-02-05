@@ -10,15 +10,16 @@ server applications using C++ and
 [Boost::Asio](https://www.boost.org/doc/libs/1_76_0/doc/html/boost_asio.html)
 
 ```mermaid
+%%{init: {'theme':'dark'}}%%
 sequenceDiagram
     participant client
     participant server
-    client-->>server: connect
+    client-->>+server: connect
     server->>client: welcome
-    client->>server: command
-    server->>client: output
+    client->>+server: command
+    server->>-client: output
     client->>server: exit
-    server-->>client: disconnect
+    server-->-client: disconnect
 ```
 
 ## Dependencies
