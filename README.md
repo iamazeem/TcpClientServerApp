@@ -11,14 +11,18 @@ server applications using C++ and
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant client
     participant server
-    client-->>+server: connect
+    client-->>server: connect
     server->>client: welcome
-    client->>+server: command
-    server->>-client: output
+    client->>server: command
+    activate server
+    note right of server: execute
+    server->>client: output
+    deactivate server
     client->>server: exit
-    server-->-client: disconnect
+    server--xclient: disconnect
 ```
 
 ## Dependencies
