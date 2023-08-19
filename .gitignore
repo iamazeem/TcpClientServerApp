@@ -33,6 +33,3 @@ build
 *.exe
 *.out
 *.app
-
-# IDEs
-.vscode
