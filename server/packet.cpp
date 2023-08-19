@@ -1,6 +1,10 @@
-#include "common.hpp"
+#include <sstream>
+
+#include "spdlog/spdlog.h"
+
+#include "constants.hpp"
 #include "packet.hpp"
-#include "utilities.hpp"
+#include "utils.hpp"
 
 using boost::asio::buffer;
 using boost::asio::read;
@@ -60,32 +64,22 @@ error_code packet::recv(tcp::socket &socket) noexcept
     read(socket, buffer(&m_header, get_header_size()), transfer_exactly(get_header_size()), ec);
     if (ec)
     {
-        lock_stream();
-        LOG_INF() << "Header read error! " << ec.message() << std::endl;
-        unlock_stream();
-
+        spdlog::error("header read error, {}", ec.message());
         return ec;
     }
 
-    // lock_stream();
-    // LOG_INF() << "Header: "
-    //             << std::hex << get_version() << ", "
-    //             << std::hex << get_message_type()    << ", "
-    //             << std::dec << get_length()  << std::endl;
-    // unlock_stream();
+    spdlog::info("header: {}", dump());
 
     const unsigned int bytes_to_read = get_length() - get_header_size();
     if (bytes_to_read > 0)
     {
-        // lock_stream();
-        // LOG_INF() << "Read Size: " << bytes_to_read << std::endl;
-        // unlock_stream();
+        spdlog::info("bytes to read: {}", bytes_to_read);
 
         streambuf read_buffer;
         read(socket, read_buffer, transfer_exactly(bytes_to_read), ec);
         if (ec)
         {
-            LOG_ERR() << "Message read error! " << ec.message() << std::endl;
+            spdlog::error("message read error, {}", ec.message());
             return ec;
         }
 
@@ -93,9 +87,7 @@ error_code packet::recv(tcp::socket &socket) noexcept
                                         std::istreambuf_iterator<char>());
         set_message(data_received);
 
-        lock_stream();
-        LOG_INF() << "Received: " << *this << std::endl;
-        unlock_stream();
+        spdlog::info("received: {}", dump());
     }
 
     return ec;
@@ -103,22 +95,14 @@ error_code packet::recv(tcp::socket &socket) noexcept
 
 error_code packet::send(tcp::socket &socket) noexcept
 {
-    lock_stream();
-    LOG_INF() << "Sending packet: " << *this << std::endl;
-    unlock_stream();
+    spdlog::info("sending packet: {}", dump());
 
     // Send packet header
     error_code ec;
     write(socket, buffer(&m_header, get_header_size()), transfer_exactly(get_header_size()), ec);
     if (ec)
     {
-        lock_stream();
-        LOG_ERR() << "Could not send header! ["
-                  << get_peer_ip(socket) << ":"
-                  << get_peer_port(socket)
-                  << "]" << std::endl;
-        unlock_stream();
-
+        spdlog::error("could not send header [{}:{}]", get_peer_ip(socket), get_peer_port(socket));
         return ec;
     }
 
@@ -126,26 +110,14 @@ error_code packet::send(tcp::socket &socket) noexcept
     write(socket, buffer(get_message(), get_message_size()), transfer_exactly(get_message_size()), ec);
     if (ec)
     {
-        lock_stream();
-        LOG_ERR() << "Could not send message! ["
-                  << get_peer_ip(socket) << ":"
-                  << get_peer_port(socket)
-                  << "]" << std::endl;
-        unlock_stream();
-
+        spdlog::error("could not send message [{}:{}]", get_peer_ip(socket), get_peer_port(socket));
         return ec;
     }
-
-    lock_stream();
-    LOG_INF() << "Packet sent! ["
-              << get_peer_ip(socket) << ":"
-              << get_peer_port(socket)
-              << "]..." << std::endl;
-    unlock_stream();
 
     // Reset packet message
     set_message("");
 
+    spdlog::info("packet sent [{}:{}]", get_peer_ip(socket), get_peer_port(socket));
     return ec;
 }
 
@@ -161,6 +133,7 @@ error_code packet::process(tcp::socket &socket) noexcept
     // Communicate with client using defined protocol
     do
     {
+        spdlog::info("receiving command from client");
         ec = recv(socket);
         if (!ec)
         {
@@ -168,49 +141,26 @@ error_code packet::process(tcp::socket &socket) noexcept
             {
                 if (get_message_type() == MSG_EXIT)
                 {
-                    lock_stream();
-                    LOG_INF() << "EXIT packet received! -> " << *this << std::endl;
-                    unlock_stream();
+                    spdlog::info("EXIT packet received [{}]", dump());
                     break;
                 }
                 else if (get_message_type() == MSG_COMMAND)
                 {
                     ec = process_client_command(get_message(), socket);
-
-                    lock_stream();
-                    LOG_INF() << "COMMAND PROCESSING COMPLETED!" << std::endl;
-                    unlock_stream();
+                    spdlog::info("command processing completed");
                 }
             }
             else
             {
-                lock_stream();
-                LOG_ERR() << "Invalid message format! -> " << *this << std::endl;
-                unlock_stream();
+                spdlog::error("invalid message format [{}]", dump());
             }
         }
     } while (!ec && socket.is_open() &&
              get_message_type() != MSG_EXIT &&
              get_message() != "EXIT");
 
-    lock_stream();
-    LOG_INF() << "Session ended with client!" << std::endl;
-    unlock_stream();
-
+    spdlog::info("session completed");
     return ec;
-}
-
-std::ostream &operator<<(std::ostream &os, const packet &packet)
-{
-    os << "Packet: HDR {V:"
-       << std::hex << packet.get_version() << ", T:0x"
-       << std::hex << packet.get_message_type() << ", L:"
-       << std::dec << packet.get_packet_size() << "} | ";
-
-    os << "MSG {L:" << packet.get_message_size() << "} "
-       << packet.get_message();
-
-    return os;
 }
 
 error_code packet::welcome_client(tcp::socket &socket) noexcept
@@ -221,18 +171,16 @@ error_code packet::welcome_client(tcp::socket &socket) noexcept
     set_message(ss.str());
     set(MSG_VERSION, MSG_WELCOME, get_packet_size());
 
+    spdlog::info("sending welcome message to client [{}]", dump());
+
     const auto ec = send(socket);
     if (ec)
     {
-        lock_stream();
-        LOG_ERR() << ec.message() << std::endl;
-        unlock_stream();
+        spdlog::error("error while sending welcome message to client, error: {}", ec.message());
+        return ec;
     }
 
-    lock_stream();
-    LOG_INF() << "Welcome message sent! " << *this << std::endl;
-    unlock_stream();
-
+    spdlog::info("welcome message sent");
     return {};
 }
 
@@ -240,46 +188,43 @@ error_code packet::process_client_command(const std::string cmd, tcp::socket &so
 {
     // For now, only "ls" command is hard-coded!
 
+    spdlog::info("processing command [{}]", cmd);
+
     std::string cmd_output;
-    unsigned int msg_type;
 
     // Execute command and form output message
     if (std::system(cmd.data()) == boost::system::errc::success)
     {
-        cmd_output = "File is present!";
-        msg_type = MSG_FILE_PRESENT;
+        cmd_output = "SUCCESS";
     }
     else
     {
-        cmd_output = "File is NOT present!";
-        msg_type = MSG_FILE_NOT_PRESENT;
+        cmd_output = "FAILURE";
     }
+
+    spdlog::info("sending command output");
 
     // Form output packet
     set_message(cmd_output);
-    set(MSG_VERSION, msg_type, get_packet_size());
+    set(MSG_VERSION, MSG_COMMAND_OUTPUT, get_packet_size());
 
     // Send command output
     auto ec = send(socket);
     if (ec)
     {
-        lock_stream();
-        LOG_ERR() << ec.message() << std::endl;
-        unlock_stream();
+        spdlog::error("error while sending command output, error: {}", ec.message());
+        return ec;
     }
 
-    lock_stream();
-    LOG_INF() << "Command output sent!" << std::endl;
-    unlock_stream();
+    spdlog::info("command output sent");
 
-    // Acknowledge client response
-    ec = acknowledge_client_response(socket);
-
-    return ec;
+    return acknowledge_client_response(socket);
 }
 
 error_code packet::acknowledge_client_response(tcp::socket &socket) noexcept
 {
+    spdlog::info("receiving client response ack");
+
     const auto ec = recv(socket);
     if (ec)
     {
@@ -291,19 +236,28 @@ error_code packet::acknowledge_client_response(tcp::socket &socket) noexcept
         if (get_message_type() == MSG_DATA_ACK ||
             get_message_type() == MSG_FIN_DATA_ACK)
         {
-            lock_stream();
-            LOG_INF() << "Acknowledgment received from client!" << std::endl;
-            unlock_stream();
+            spdlog::info("ack received from client");
         }
         else
         {
-            lock_stream();
-            LOG_ERR() << "Invalid message format! -> " << *this << std::endl;
-            unlock_stream();
+            spdlog::error("invalid message format [{}]", dump());
         }
     }
 
     return ec;
+}
+
+std::string packet::dump() const noexcept
+{
+    std::ostringstream oss;
+    oss << "Packet: HDR {V:"
+        << std::hex << get_version() << ", T:0x"
+        << std::hex << get_message_type() << ", L:"
+        << std::dec << get_packet_size() << "} | ";
+
+    oss << "MSG {L:" << get_message_size() << "} "
+        << get_message();
+    return oss.str();
 }
 
 bool packet::is_valid_version() const noexcept

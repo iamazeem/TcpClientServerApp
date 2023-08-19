@@ -2,6 +2,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
+
 #include "message.hpp"
 
 using boost::asio::ip::tcp;
@@ -41,7 +42,7 @@ public:
     error_code send(tcp::socket &socket) noexcept;
     error_code process(tcp::socket &socket) noexcept;
 
-    friend std::ostream &operator<<(std::ostream &os, const packet &packet);
+    std::string dump() const noexcept;
 
 private:
     error_code welcome_client(tcp::socket &socket) noexcept;

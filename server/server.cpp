@@ -1,12 +1,16 @@
 #include <exception>
+
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/system/error_code.hpp>
 
-#include "common.hpp"
+#include "spdlog/spdlog.h"
+
+#include "constants.hpp"
 #include "server.hpp"
-#include "utilities.hpp"
+#include "utils.hpp"
 
 using boost::shared_ptr;
 using boost::asio::ip::address;
@@ -27,7 +31,8 @@ server::server(const std::string ip, const unsigned short port,
     // Add signal handling for graceful termination (CTRL + C)
     m_signals.async_wait(boost::bind(&server::stop, this));
 
-    LOG_INF() << "Initiating server..." << std::endl;
+    spdlog::info("starting [{}:{}]", ip, port);
+
     for (unsigned int i = 0; i < num_threads; ++i)
     {
         m_executors_thread_group.create_thread(boost::bind(&server::worker_thread_callback,
@@ -38,18 +43,12 @@ server::server(const std::string ip, const unsigned short port,
     m_acceptor.async_accept(m_session->get_socket(),
                             boost::bind(&server::accept_handler, this, m_session, error));
 
-    lock_stream();
-    LOG_INF() << "Server started! [" << m_endpoint << "]" << std::endl;
-    unlock_stream();
+    spdlog::info("started");
 }
 
 server::~server() noexcept
 {
     stop();
-
-    lock_stream();
-    LOG_INF() << "Server closed successfully! Bye bye! :)" << std::endl;
-    unlock_stream();
 }
 
 void server::start() noexcept
@@ -70,6 +69,7 @@ void server::stop() noexcept
         // m_executors_thread_group.interrupt_all();
         // m_executors_thread_group.join_all();
     }
+    spdlog::info("server stopped successfully");
 }
 
 // Utility methods
@@ -84,16 +84,12 @@ void server::worker_thread_callback(boost::shared_ptr<io_service> ios) noexcept
             ios->run(ec);
             if (ec)
             {
-                lock_stream();
-                LOG_ERR() << " Error: " << ec.message() << std::endl;
-                unlock_stream();
+                spdlog::error("error: {}", ec.message());
             }
         }
         catch (const std::exception &e)
         {
-            lock_stream();
-            LOG_ERR() << " Exception: " << e.what() << std::endl;
-            unlock_stream();
+            spdlog::error("exception: {}", e.what());
         }
     }
 }
@@ -102,9 +98,9 @@ void server::accept_handler(boost::shared_ptr<session> this_session, const error
 {
     if (!ec)
     {
-        LOG_INF() << "Connection established with client! ["
-                  << get_peer_ip(this_session->get_socket()) << ":"
-                  << get_peer_port(this_session->get_socket()) << "]" << std::endl;
+        const auto client_ip = get_peer_ip(this_session->get_socket());
+        const auto client_port = get_peer_port(this_session->get_socket());
+        spdlog::info("new client connected [{}:{}]", client_ip, client_port);
 
         m_ios_executors->post(boost::bind(&session::start, this_session));
 

@@ -41,7 +41,7 @@ public:
     error_code send(tcp::socket &socket) noexcept;
     error_code process(tcp::socket &socket) noexcept;
 
-    friend std::ostream &operator<<(std::ostream &os, const packet &packet);
+    std::string dump() const noexcept;
 
 private:
     bool is_valid_version() const noexcept;

@@ -1,9 +1,6 @@
 #include <exception>
-
-#include "common.hpp"
+#include "spdlog/spdlog.h"
 #include "session.hpp"
-#include "packet.hpp"
-#include "utilities.hpp"
 
 session::session(shared_ptr<io_service> ios) noexcept
     : m_io_service{ios},
@@ -26,9 +23,7 @@ void session::start() noexcept
     }
     catch (const std::exception &e)
     {
-        lock_stream();
-        LOG_ERR() << "Exception: " << e.what() << std::endl;
-        unlock_stream();
+        spdlog::error("exception: {}", e.what());
     }
 }
 

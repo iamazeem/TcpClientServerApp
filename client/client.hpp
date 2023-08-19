@@ -1,8 +1,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-
-#include "common.hpp"
 #include "packet.hpp"
 
 using boost::asio::io_service;
