@@ -4,13 +4,13 @@
 #include "message.hpp"
 #include "utils.hpp"
 
-session::session(shared_ptr<io_service> ios) noexcept
+session_t::session_t(shared_ptr<io_service> ios) noexcept
     : m_io_service{ios},
       m_socket{*m_io_service}
 {
 }
 
-void session::start() noexcept
+void session_t::start() noexcept
 {
     spdlog::info("session started");
     process();
@@ -18,13 +18,13 @@ void session::start() noexcept
     spdlog::info("session completed");
 }
 
-void session::stop() noexcept
+void session_t::stop() noexcept
 {
     m_socket.shutdown(boost::asio::socket_base::shutdown_both);
     m_socket.close();
 }
 
-void session::process() noexcept
+void session_t::process() noexcept
 {
     if (!welcome_client())
     {
@@ -58,7 +58,7 @@ void session::process() noexcept
     } while (m_socket.is_open());
 }
 
-bool session::welcome_client() noexcept
+bool session_t::welcome_client() noexcept
 {
     std::ostringstream oss;
     oss << "Welcome! [" << get_peer_ip(m_socket) << ":" << get_peer_port(m_socket) << "]";
@@ -75,7 +75,7 @@ bool session::welcome_client() noexcept
     return true;
 }
 
-bool session::process_command(const std::string& cmd) noexcept
+bool session_t::process_command(const std::string& cmd) noexcept
 {
     spdlog::info("processing command [{}]", cmd);
 

@@ -15,19 +15,20 @@ using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::system::error_code;
 
-class server final
+class server_t final
 {
 public:
-    server(const std::string ip, const unsigned short port,
-           const unsigned short num_threads) noexcept;
-    ~server() noexcept;
+    server_t(
+        const std::string ip, const unsigned short port,
+        const unsigned short num_threads) noexcept;
+    ~server_t() noexcept;
 
     void start() noexcept;
     void stop() noexcept;
 
 private:
     void worker_thread_callback(shared_ptr<io_service> ios) noexcept;
-    void accept_handler(shared_ptr<session> this_session, const error_code &ec) noexcept;
+    void accept_handler(shared_ptr<session_t> this_session, const error_code &ec) noexcept;
     void accept_new_connection() noexcept;
 
     shared_ptr<io_service> m_ios_acceptors;
@@ -39,7 +40,7 @@ private:
     tcp::endpoint m_endpoint;
     tcp::acceptor m_acceptor;
 
-    shared_ptr<session> m_session;
+    shared_ptr<session_t> m_session;
 
     boost::asio::signal_set m_signals;
 };

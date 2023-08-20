@@ -8,18 +8,18 @@ using boost::asio::ip::address;
 using boost::asio::placeholders::error;
 using boost::system::error_code;
 
-client::client(const std::string ip, const unsigned short port) noexcept
+client_t::client_t(const std::string ip, const unsigned short port) noexcept
     : m_endpoint{address::from_string(ip), port},
       m_socket{m_io_service}
 {
 }
 
-client::~client() noexcept
+client_t::~client_t() noexcept
 {
     disconnect();
 }
 
-void client::start() noexcept
+void client_t::start() noexcept
 {
     if (connect())
     {
@@ -27,7 +27,7 @@ void client::start() noexcept
     }
 }
 
-bool client::connect() noexcept
+bool client_t::connect() noexcept
 {
     spdlog::info("connecting [{}:{}]", m_endpoint.address().to_string(), m_endpoint.port());
 
@@ -43,7 +43,7 @@ bool client::connect() noexcept
     return true;
 }
 
-void client::disconnect() noexcept
+void client_t::disconnect() noexcept
 {
     if (m_socket.is_open())
     {
@@ -52,7 +52,7 @@ void client::disconnect() noexcept
     }
 }
 
-void client::process() noexcept
+void client_t::process() noexcept
 {
     // Receive welcome message
     spdlog::info("receiving welcome message from server");

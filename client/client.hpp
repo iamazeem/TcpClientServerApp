@@ -6,11 +6,11 @@ using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::system::error_code;
 
-class client final
+class client_t final
 {
 public:
-    client(const std::string ip, const unsigned short port) noexcept;
-    ~client() noexcept;
+    client_t(const std::string ip, const unsigned short port) noexcept;
+    ~client_t() noexcept;
 
     void start() noexcept;
 

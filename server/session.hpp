@@ -8,10 +8,10 @@ using boost::shared_ptr;
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 
-class session final
+class session_t final
 {
 public:
-    session(shared_ptr<io_service> ios) noexcept;
+    session_t(shared_ptr<io_service> ios) noexcept;
 
     void start() noexcept;
     void stop() noexcept;
