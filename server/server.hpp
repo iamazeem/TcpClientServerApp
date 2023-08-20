@@ -19,7 +19,7 @@ class server final
 {
 public:
     server(const std::string ip, const unsigned short port,
-           const unsigned int num_threads) noexcept;
+           const unsigned short num_threads) noexcept;
     ~server() noexcept;
 
     void start() noexcept;

@@ -2,9 +2,6 @@
 
 #include <boost/asio.hpp>
 
-#include "common.hpp"
-#include "packet.hpp"
-
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -20,9 +17,9 @@ public:
 private:
     bool connect() noexcept;
     void disconnect() noexcept;
+    void process() noexcept;
 
     io_service m_io_service;
     tcp::endpoint m_endpoint;
     tcp::socket m_socket;
-    packet m_packet;
 };

@@ -34,7 +34,7 @@ sequenceDiagram
 ## Build
 
 ```shell
-git clone git@github.com:iamazeem/TcpClientServerApp.git
+git clone --recursive git@github.com:iamazeem/TcpClientServerApp.git
 cd TcpClientServerApp
 cmake -S . -B build
 cmake --build build
