@@ -7,8 +7,6 @@
 #include <boost/system/error_code.hpp>
 
 #include "spdlog/spdlog.h"
-
-#include "constants.hpp"
 #include "server.hpp"
 #include "utils.hpp"
 
@@ -18,7 +16,7 @@ using boost::asio::placeholders::error;
 using boost::system::error_code;
 
 server::server(const std::string ip, const unsigned short port,
-               const unsigned int num_threads) noexcept
+               const unsigned short num_threads) noexcept
     : m_ios_acceptors{boost::make_shared<io_service>()},
       m_ios_work_acceptors{boost::make_shared<io_service::work>(*m_ios_acceptors)},
       m_ios_executors{boost::make_shared<io_service>()},

@@ -13,7 +13,6 @@ include_directories(
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../common/utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/packet.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/session.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/server.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp

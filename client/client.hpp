@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include "packet.hpp"
 
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
@@ -18,9 +17,9 @@ public:
 private:
     bool connect() noexcept;
     void disconnect() noexcept;
+    void process() noexcept;
 
     io_service m_io_service;
     tcp::endpoint m_endpoint;
     tcp::socket m_socket;
-    packet m_packet;
 };
