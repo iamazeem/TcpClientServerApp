@@ -102,7 +102,6 @@ public:
 
     const header_t &get_header() const noexcept { return m_header; }
     std::string get_payload() const noexcept { return m_payload; }
-    std::size_t get_message_size() const noexcept { return sizeof(header_t) + m_payload.size(); }
 
     std::string dump() const noexcept
     {
