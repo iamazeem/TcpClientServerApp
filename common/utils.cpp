@@ -46,7 +46,7 @@ message_t recv(tcp::socket &socket) noexcept
     {
         return {header, ""};
     }
- 
+
     streambuf payload_buffer;
     read(socket, payload_buffer, transfer_exactly(header.get_payload_size()), ec);
     if (ec)

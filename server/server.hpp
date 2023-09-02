@@ -23,7 +23,7 @@ public:
         const unsigned short num_threads) noexcept;
     ~server_t() noexcept;
 
-    void start() noexcept;
+    bool start() noexcept;
     void stop() noexcept;
 
 private:

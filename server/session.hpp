@@ -12,16 +12,16 @@ class session_t final
 {
 public:
     session_t(shared_ptr<io_service> ios) noexcept;
+    ~session_t() noexcept;
 
-    void start() noexcept;
-    void stop() noexcept;
+    bool start() noexcept;
 
     tcp::socket &get_socket() noexcept { return m_socket; }
 
 private:
-    void process() noexcept;
+    bool process() noexcept;
     bool welcome_client() noexcept;
-    bool process_command(const std::string& cmd) noexcept;
+    bool process_command(const std::string &cmd) noexcept;
 
     shared_ptr<io_service> m_io_service;
     tcp::socket m_socket;

@@ -12,12 +12,12 @@ public:
     client_t(const std::string ip, const unsigned short port) noexcept;
     ~client_t() noexcept;
 
-    void start() noexcept;
+    bool start() noexcept;
 
 private:
     bool connect() noexcept;
+    bool process() noexcept;
     void disconnect() noexcept;
-    void process() noexcept;
 
     io_service m_io_service;
     tcp::endpoint m_endpoint;

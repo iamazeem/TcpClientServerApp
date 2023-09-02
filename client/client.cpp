@@ -19,12 +19,17 @@ client_t::~client_t() noexcept
     disconnect();
 }
 
-void client_t::start() noexcept
+bool client_t::start() noexcept
 {
-    if (connect())
+    if (!connect())
     {
-        process();
+        return false;
     }
+    if (!process())
+    {
+        return false;
+    }
+    return true;
 }
 
 bool client_t::connect() noexcept
@@ -43,16 +48,7 @@ bool client_t::connect() noexcept
     return true;
 }
 
-void client_t::disconnect() noexcept
-{
-    if (m_socket.is_open())
-    {
-        m_socket.close();
-        spdlog::info("disconnected");
-    }
-}
-
-void client_t::process() noexcept
+bool client_t::process() noexcept
 {
     // Receive welcome message
     spdlog::info("receiving welcome message from server");
@@ -60,18 +56,19 @@ void client_t::process() noexcept
     if (welcome_msg.get_header().get_type() != message_t::type_t::welcome)
     {
         spdlog::info("invalid welcome message type, {}", welcome_msg.dump());
-        return;
+        return false;
     }
     spdlog::info("welcome message received, {}", welcome_msg.dump());
 
     // Send command request message
+    const auto cmd = "ls test";
     message_t cmd_request_msg;
-    cmd_request_msg.set(message_t::type_t::command_request, "ls test");
+    cmd_request_msg.set(message_t::type_t::command_request, cmd);
     spdlog::info("sending command request [{}]", cmd_request_msg.dump());
     if (!send(m_socket, cmd_request_msg))
     {
         spdlog::error("error while sending command request");
-        return;
+        return false;
     }
     spdlog::info("command request sent");
 
@@ -81,7 +78,7 @@ void client_t::process() noexcept
     if (cmd_response_msg.get_header().get_type() != message_t::type_t::command_response)
     {
         spdlog::info("invalid command response type, {}", cmd_response_msg.dump());
-        return;
+        return false;
     }
     spdlog::info("command response received: {}", cmd_response_msg.dump());
 
@@ -92,9 +89,19 @@ void client_t::process() noexcept
     if (!send(m_socket, exit_msg))
     {
         spdlog::error("error while sending command request");
-        return;
+        return false;
     }
     spdlog::info("exit message sent");
 
     spdlog::info("session completed");
+    return true;
+}
+
+void client_t::disconnect() noexcept
+{
+    if (m_socket.is_open())
+    {
+        m_socket.close();
+        spdlog::info("disconnected");
+    }
 }

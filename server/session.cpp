@@ -10,25 +10,31 @@ session_t::session_t(shared_ptr<io_service> ios) noexcept
 {
 }
 
-void session_t::start() noexcept
+session_t::~session_t() noexcept
+{
+    if (m_socket.is_open())
+    {
+        m_socket.shutdown(boost::asio::socket_base::shutdown_both);
+        m_socket.close();
+    }
+}
+
+bool session_t::start() noexcept
 {
     spdlog::info("session started");
-    process();
-    stop();
+    if (!process())
+    {
+        return false;
+    }
     spdlog::info("session completed");
+    return true;
 }
 
-void session_t::stop() noexcept
-{
-    m_socket.shutdown(boost::asio::socket_base::shutdown_both);
-    m_socket.close();
-}
-
-void session_t::process() noexcept
+bool session_t::process() noexcept
 {
     if (!welcome_client())
     {
-        return;
+        return false;
     }
 
     do
@@ -46,16 +52,17 @@ void session_t::process() noexcept
             if (!process_command(msg.get_payload()))
             {
                 spdlog::info("error while process command request message");
-                break;
+                return false;
             }
             spdlog::info("command processing completed");
         }
         else
         {
             spdlog::error("invalid message type received");
-            break;
+            return false;
         }
     } while (m_socket.is_open());
+    return true;
 }
 
 bool session_t::welcome_client() noexcept
@@ -75,7 +82,7 @@ bool session_t::welcome_client() noexcept
     return true;
 }
 
-bool session_t::process_command(const std::string& cmd) noexcept
+bool session_t::process_command(const std::string &cmd) noexcept
 {
     spdlog::info("processing command [{}]", cmd);
 

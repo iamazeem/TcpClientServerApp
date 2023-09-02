@@ -88,13 +88,13 @@ public:
 
     message_t() = default;
 
-    message_t(const header_t& header, const std::string& payload) noexcept
+    message_t(const header_t &header, const std::string &payload) noexcept
         : m_header{header},
           m_payload{payload}
     {
     }
 
-    void set(const type_t type, const std::string& payload) noexcept
+    void set(const type_t type, const std::string &payload) noexcept
     {
         m_header.set(version, type, payload.size());
         m_payload = payload;

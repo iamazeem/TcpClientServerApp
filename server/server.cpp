@@ -42,17 +42,25 @@ server_t::server_t(
     m_acceptor.async_accept(m_session->get_socket(),
                             boost::bind(&server_t::accept_handler, this, m_session, error));
 
-    spdlog::info("started");
+    spdlog::info("started, press CTRL+C to quit");
 }
 
 server_t::~server_t() noexcept
 {
     stop();
+    spdlog::info("server stopped successfully");
 }
 
-void server_t::start() noexcept
+bool server_t::start() noexcept
 {
-    m_ios_acceptors->run();
+    error_code ec;
+    m_ios_acceptors->run(ec);
+    if (ec)
+    {
+        spdlog::error("error: {}", ec.message());
+        return false;
+    }
+    return true;
 }
 
 void server_t::stop() noexcept
@@ -65,31 +73,20 @@ void server_t::stop() noexcept
     if (!m_ios_executors->stopped())
     {
         m_ios_executors->stop();
-        // m_executors_thread_group.interrupt_all();
-        // m_executors_thread_group.join_all();
+        m_executors_thread_group.interrupt_all();
+        m_executors_thread_group.join_all();
     }
-    spdlog::info("server stopped successfully");
 }
 
 // Utility methods
 
 void server_t::worker_thread_callback(boost::shared_ptr<io_service> ios) noexcept
 {
-    while (true)
+    error_code ec;
+    ios->run(ec);
+    if (ec)
     {
-        try
-        {
-            error_code ec;
-            ios->run(ec);
-            if (ec)
-            {
-                spdlog::error("error: {}", ec.message());
-            }
-        }
-        catch (const std::exception &e)
-        {
-            spdlog::error("exception: {}", e.what());
-        }
+        spdlog::error("callback error: {}", ec.message());
     }
 }
 
