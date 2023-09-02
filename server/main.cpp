@@ -5,7 +5,7 @@
 
 int main()
 {
-    spdlog::default_logger()->set_pattern("%+");
+    spdlog::default_logger()->set_pattern("[SERVER] %+");
     spdlog::default_logger()->set_level(spdlog::level::debug);
 
     server_t server{defaults::server::ip, defaults::server::port, defaults::server::threads};

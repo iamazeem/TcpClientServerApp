@@ -5,7 +5,7 @@
 
 int main()
 {
-    spdlog::default_logger()->set_pattern("%+");
+    spdlog::default_logger()->set_pattern("[CLIENT] %+");
     spdlog::default_logger()->set_level(spdlog::level::debug);
 
     client_t client{defaults::server::ip, defaults::server::port};
