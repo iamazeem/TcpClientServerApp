@@ -27,3 +27,10 @@ jobs:
         cmake -S . -B build
         cmake --build build
         ls -Gghl build/server build/client
+
+    - name: Test
+      run: |
+        ./build/server/server &
+        sleep 1s
+        ./build/client/client
+        kill -TERM $(pidof server)
